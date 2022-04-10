@@ -1,24 +1,21 @@
 
 package com.schibsted.spt.data.jslt;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Collection;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test cases verifying queries against an input.
@@ -60,7 +57,7 @@ public class QueryTest extends TestBase {
     }
   }
 
-  @Parameters(name= "query: {1}")
+  @Parameters(name = "query: {1}")
   public static Collection<Object[]> data() {
     List<Object[]> strings = new ArrayList();
     strings.addAll(loadTests("query-tests.json"));
@@ -83,12 +80,12 @@ public class QueryTest extends TestBase {
         // this works because we load the same file in QueryErrorTest
         continue;
 
-      strings.add(new Object[] {
-          test.get("input").asText(),
-          test.get("query").asText(),
-          test.get("output").asText(),
-          toMap(test.get("variables"))
-        });
+      strings.add(new Object[]{
+              test.get("input").asText(),
+              test.get("query").asText(),
+              test.get("output").asText(),
+              toMap(test.get("variables"))
+      });
     }
     return strings;
   }

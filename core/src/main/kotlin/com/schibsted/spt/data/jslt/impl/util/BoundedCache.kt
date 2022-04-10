@@ -1,4 +1,3 @@
-
 // Copyright 2018 Schibsted Marketplaces Products & Technology As
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,29 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+package com.schibsted.spt.data.jslt.impl.util
 
-package com.schibsted.spt.data.jslt.impl;
+import java.util.LinkedHashMap
 
-import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode;
-import com.schibsted.spt.data.jslt.impl.expressions.LetExpression;
-
-public class LetInfo extends VariableInfo {
-  private LetExpression let;
-
-  public LetInfo(LetExpression let) {
-    super(let.getLocation());
-    this.let = let;
-  }
-
-  public String getName() {
-    return let.getVariable();
-  }
-
-  public boolean isLet() {
-    return false;
-  }
-
-  public ExpressionNode getDeclaration() {
-    return let.getDeclaration();
-  }
+/**
+ * A Map implementation that deletes the oldest entry once the size
+ * goes over a preset limit. This prevents the Map from growing
+ * without bounds.
+ */
+class BoundedCache<K, V>(private val maxSize: Int) : LinkedHashMap<K, V>() {
+    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>?): Boolean {
+        return size > maxSize
+    }
 }

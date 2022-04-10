@@ -15,6 +15,8 @@
 
 package com.schibsted.spt.data.jslt.impl;
 
+import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode;
+
 /**
  * Class encapsulating what we know about a specific variable. Keeps
  * track of the stack frame slot, but mostly used for optimizations.

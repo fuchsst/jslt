@@ -1,4 +1,3 @@
-
 // Copyright 2018 Schibsted Marketplaces Products & Technology As
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,29 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+package com.schibsted.spt.data.jslt.impl
 
-package com.schibsted.spt.data.jslt.impl;
+import com.schibsted.spt.data.jslt.Callable
 
-import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode;
-import com.schibsted.spt.data.jslt.impl.expressions.LetExpression;
+abstract class AbstractCallable(override val name: String, min: Int, max: Int) : Callable {
 
-public class LetInfo extends VariableInfo {
-  private LetExpression let;
+    override val minArguments: Int = min
 
-  public LetInfo(LetExpression let) {
-    super(let.getLocation());
-    this.let = let;
-  }
-
-  public String getName() {
-    return let.getVariable();
-  }
-
-  public boolean isLet() {
-    return false;
-  }
-
-  public ExpressionNode getDeclaration() {
-    return let.getDeclaration();
-  }
+    override val maxArguments: Int = max
 }

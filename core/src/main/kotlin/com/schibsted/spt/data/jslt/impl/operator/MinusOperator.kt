@@ -1,4 +1,3 @@
-
 // Copyright 2018 Schibsted Marketplaces Products & Technology As
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,29 +11,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+package com.schibsted.spt.data.jslt.impl.operator
 
-package com.schibsted.spt.data.jslt.impl;
+import com.schibsted.spt.data.jslt.impl.Location
+import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
+import com.schibsted.spt.data.jslt.impl.operator.NumericOperator
 
-import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode;
-import com.schibsted.spt.data.jslt.impl.expressions.LetExpression;
+class MinusOperator(
+    left: ExpressionNode, right: ExpressionNode,
+    location: Location?
+) : NumericOperator(left, right, "-", location) {
+    // we only support the numeric operation and nothing else
+    override fun perform(v1: Double, v2: Double): Double {
+        return v1 - v2
+    }
 
-public class LetInfo extends VariableInfo {
-  private LetExpression let;
-
-  public LetInfo(LetExpression let) {
-    super(let.getLocation());
-    this.let = let;
-  }
-
-  public String getName() {
-    return let.getVariable();
-  }
-
-  public boolean isLet() {
-    return false;
-  }
-
-  public ExpressionNode getDeclaration() {
-    return let.getDeclaration();
-  }
+    override fun perform(v1: Long, v2: Long): Long {
+        return v1 - v2
+    }
 }

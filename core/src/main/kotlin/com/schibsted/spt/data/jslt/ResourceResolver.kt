@@ -1,4 +1,3 @@
-
 // Copyright 2018 Schibsted Marketplaces Products & Technology As
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,29 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+package com.schibsted.spt.data.jslt
 
-package com.schibsted.spt.data.jslt.impl;
+import java.io.Reader
 
-import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode;
-import com.schibsted.spt.data.jslt.impl.expressions.LetExpression;
-
-public class LetInfo extends VariableInfo {
-  private LetExpression let;
-
-  public LetInfo(LetExpression let) {
-    super(let.getLocation());
-    this.let = let;
-  }
-
-  public String getName() {
-    return let.getVariable();
-  }
-
-  public boolean isLet() {
-    return false;
-  }
-
-  public ExpressionNode getDeclaration() {
-    return let.getDeclaration();
-  }
+/**
+ * Given a string identifying a JSLT module file, return a Reader that
+ * produces the module. This abstract class can be used to look up module
+ * files other places than just on the classpath.
+ */
+interface ResourceResolver {
+    /**
+     * Return a Reader for the given module.
+     */
+    fun resolve(jslt: String): Reader
 }

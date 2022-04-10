@@ -15,6 +15,12 @@
 
 package com.schibsted.spt.data.jslt.impl;
 
+import com.schibsted.spt.data.jslt.impl.Location;
+import com.schibsted.spt.data.jslt.impl.PreparationContext;
+import com.schibsted.spt.data.jslt.impl.expressions.DotExpression;
+import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode;
+import com.schibsted.spt.data.jslt.impl.util.NodeUtils;
+
 import java.util.List;
 import java.util.Collections;
 

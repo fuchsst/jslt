@@ -20,6 +20,8 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.ArrayDeque;
 import com.schibsted.spt.data.jslt.JsltException;
+import com.schibsted.spt.data.jslt.impl.expressions.LetExpression;
+import com.schibsted.spt.data.jslt.impl.expressions.VariableExpression;
 
 /**
  * Keeps track of declared variables and maps them to their slots in
