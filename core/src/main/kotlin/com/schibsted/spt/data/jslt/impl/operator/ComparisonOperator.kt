@@ -26,7 +26,6 @@ abstract class ComparisonOperator(
     abstract override fun perform(v1: JsonNode, v2: JsonNode): JsonNode
 
     companion object {
-        @JvmOverloads
         fun compare(v1: JsonNode, v2: JsonNode, location: Location?): Double {
             if (v1.isNumber && v2.isNumber) {
                 val n1 = number(v1, location).doubleValue()

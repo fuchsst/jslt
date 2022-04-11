@@ -43,7 +43,6 @@ object JSLT {
             exitProcess(1)
         }
         val output = expr.apply(input)
-        if (output == null) println("WARN: returned Java null!")
         println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(output))
     }
 }

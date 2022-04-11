@@ -64,7 +64,7 @@ class FunctionDeclaration(
 
     // the ExpressionNode API requires this method, but it doesn't
     // actually make any sense for a Function
-    override fun apply(scope: Scope?, context: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         throw JsltException("INTERNAL ERROR")
     }
 
