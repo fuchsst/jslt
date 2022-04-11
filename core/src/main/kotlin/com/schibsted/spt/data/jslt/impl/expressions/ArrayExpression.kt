@@ -15,7 +15,6 @@ package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 import com.fasterxml.jackson.databind.JsonNode
-import com.schibsted.spt.data.jslt.impl.AbstractNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.util.NodeUtils
@@ -27,7 +26,7 @@ class ArrayExpression(private val children: Array<ExpressionNode>, location: Loc
         )
     }
 
-    override fun computeMatchContexts(parent: DotExpression) {
+    override fun computeMatchContexts(parent: DotExpression?) {
         val fail = FailDotExpression(location, "array")
         for (ix in children.indices) children[ix].computeMatchContexts(fail)
     }

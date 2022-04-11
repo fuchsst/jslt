@@ -28,7 +28,7 @@ class PipeOperator(
         return right.apply(scope, left.apply(scope, input))
     }
 
-    override fun computeMatchContexts(parent: DotExpression) {
+    override fun computeMatchContexts(parent: DotExpression?) {
         left.computeMatchContexts(parent)
         right.computeMatchContexts(DotExpression(location =  Location(null, 0, 0)))
     }

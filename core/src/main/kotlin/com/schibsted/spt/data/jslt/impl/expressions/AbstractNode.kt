@@ -13,34 +13,23 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.impl.Location
-import com.schibsted.spt.data.jslt.impl.Scope
+import com.schibsted.spt.data.jslt.impl.PreparationContext
+import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 
-/**
- * Represents the '* - ... : .'
- */
-class MatcherExpression(
-    private var expr: ExpressionNode, val minuses: List<String>,
-    location: Location?
-) : AbstractNode(location) {
-
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
-        return expr.apply(scope, input)
+abstract class AbstractNode(var location: Location?) : ExpressionNode {
+    override fun dump(level: Int) {
+        println(indent(level) + this)
     }
 
-    override fun computeMatchContexts(parent: DotExpression?) {
-        // FIXME: uhhh, the rules here?
+    override fun computeMatchContexts(parent: DotExpression?) {}
+
+    override fun prepare(ctx: PreparationContext) {
+        getChildren().forEach { it.prepare(ctx) }
     }
 
-    override fun getChildren(): List<ExpressionNode> {
-        return listOf(expr)
-    }
+    override fun optimize(): ExpressionNode = this
 
-    override fun dump(level: Int) {}
+    override fun getChildren(): List<ExpressionNode> = emptyList()
 
-    override fun optimize(): ExpressionNode {
-        expr = expr.optimize()
-        return this
-    }
 }

@@ -46,8 +46,8 @@ class ObjectExpression(
         }
     }
 
-    override fun apply(scope: Scope, input: JsonNode): JsonNode {
-        evalLets(scope, input, lets)
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+        evalLets(scope!!, input!!, lets)
         val `object` = NodeUtils.mapper.createObjectNode()
         for (ix in children.indices) {
             val value = children[ix].apply(scope, input)
@@ -79,7 +79,7 @@ class ObjectExpression(
         }
     }
 
-    override fun computeMatchContexts(parent: DotExpression) {
+    override fun computeMatchContexts(parent: DotExpression?) {
         if (matcher != null) {
             contextQuery = parent
             contextQuery!!.checkOk(location) // verify expression is legal

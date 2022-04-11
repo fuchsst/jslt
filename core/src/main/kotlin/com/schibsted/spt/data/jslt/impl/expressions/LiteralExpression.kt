@@ -13,34 +13,28 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
+import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.impl.util.NodeUtils
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 
-/**
- * Represents the '* - ... : .'
- */
-class MatcherExpression(
-    private var expr: ExpressionNode, val minuses: List<String>,
-    location: Location?
-) : AbstractNode(location) {
-
+class LiteralExpression(private val value: JsonNode, location: Location?) : AbstractNode(location) {
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
-        return expr.apply(scope, input)
+        return value
     }
 
-    override fun computeMatchContexts(parent: DotExpression?) {
-        // FIXME: uhhh, the rules here?
+    override fun dump(level: Int) {
+        println(indent(level) + value)
     }
 
-    override fun getChildren(): List<ExpressionNode> {
-        return listOf(expr)
-    }
-
-    override fun dump(level: Int) {}
-
-    override fun optimize(): ExpressionNode {
-        expr = expr.optimize()
-        return this
+    override fun toString(): String {
+        return try {
+            NodeUtils.mapper.writeValueAsString(value)
+        } catch (e: JsonProcessingException) {
+            throw JsltException("Couldn't serialize literal value: $e")
+        }
     }
 }

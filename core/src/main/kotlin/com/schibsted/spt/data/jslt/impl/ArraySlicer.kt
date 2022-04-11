@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.util.NodeUtils
 import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
@@ -31,12 +32,12 @@ class ArraySlicer(// can be null
     private var parent: ExpressionNode?,
     location: Location?
 ) : AbstractNode(location) {
-    override fun apply(scope: Scope, input: JsonNode): JsonNode {
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         val sequence = parent!!.apply(scope, input)
         if (!sequence.isArray && !sequence.isTextual) return NullNode.instance
         var size = sequence.size()
         if (sequence.isTextual) size = sequence.asText().length
-        val leftix = resolveIndex(scope, left, input, size, 0)
+        val leftix = resolveIndex(scope!!, left, input!!, size, 0)
         if (!colon) {
             return if (sequence.isArray) {
                 var `val` = sequence[leftix]

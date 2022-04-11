@@ -14,7 +14,7 @@
 package com.schibsted.spt.data.jslt.impl.operator
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.schibsted.spt.data.jslt.impl.AbstractNode
+import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.expressions.DotExpression
@@ -53,7 +53,7 @@ abstract class AbstractOperator(
         ) else this
     }
 
-    override fun computeMatchContexts(parent: DotExpression) {
+    override fun computeMatchContexts(parent: DotExpression?) {
         // operators are transparent to the object matcher
         left.computeMatchContexts(parent)
         right.computeMatchContexts(parent)

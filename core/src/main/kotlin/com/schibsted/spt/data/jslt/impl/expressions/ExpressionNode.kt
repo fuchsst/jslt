@@ -1,4 +1,3 @@
-
 // Copyright 2018 Schibsted Marketplaces Products & Technology As
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+package com.schibsted.spt.data.jslt.impl.expressions
 
-package com.schibsted.spt.data.jslt.impl.expressions;
-
-import java.util.List;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.schibsted.spt.data.jslt.impl.PreparationContext;
-import com.schibsted.spt.data.jslt.impl.Scope;
+import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.impl.expressions.DotExpression
+import com.schibsted.spt.data.jslt.impl.PreparationContext
+import com.schibsted.spt.data.jslt.impl.Scope
 
 /**
  * Internal interface for the parts of a compiled JSLT expression.
@@ -27,21 +25,19 @@ import com.schibsted.spt.data.jslt.impl.Scope;
  * add methods for introspection (for optimization, generating
  * byte-code, etc).
  */
-public interface ExpressionNode {
+interface ExpressionNode {
+    fun apply(scope: Scope?, input: JsonNode?): JsonNode
 
-  public JsonNode apply(Scope scope, JsonNode input);
+    // writes debug info to stdout
+    fun dump(level: Int)
 
-  // writes debug info to stdout
-  public void dump(int level);
+    // fills in the contextQuery in ObjectExpression matchers
+    fun computeMatchContexts(parent: DotExpression?)
+    fun prepare(ctx: PreparationContext)
 
-  // fills in the contextQuery in ObjectExpression matchers
-  public void computeMatchContexts(DotExpression parent);
+    // return self, or optimized version
+    fun optimize(): ExpressionNode
 
-  public void prepare(PreparationContext ctx);
-
-  // return self, or optimized version
-  public ExpressionNode optimize();
-
-  // get all direct child nodes, to reduce boilerplate in tree traversal
-  public List<ExpressionNode> getChildren();
+    // get all direct child nodes, to reduce boilerplate in tree traversal
+    fun getChildren(): List<ExpressionNode>
 }

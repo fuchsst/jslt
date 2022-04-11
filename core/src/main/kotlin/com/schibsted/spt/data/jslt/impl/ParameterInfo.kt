@@ -1,4 +1,3 @@
-
 // Copyright 2018 Schibsted Marketplaces Products & Technology As
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+package com.schibsted.spt.data.jslt.impl
 
-package com.schibsted.spt.data.jslt.impl;
-
-/**
- * Class to encapsulate context information while the parse tree is being
- * prepared.
- */
-public class PreparationContext {
-  public ScopeManager scope;
-
-  public PreparationContext() {
-    this.scope = new ScopeManager();
-  }
-}
+class ParameterInfo(override val name: String, location: Location?) : VariableInfo(location)

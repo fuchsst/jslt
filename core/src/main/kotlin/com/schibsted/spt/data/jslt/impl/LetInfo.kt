@@ -1,4 +1,3 @@
-
 // Copyright 2018 Schibsted Marketplaces Products & Technology As
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+package com.schibsted.spt.data.jslt.impl
 
-package com.schibsted.spt.data.jslt.impl;
+import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
+import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
 
-public class ParameterInfo extends VariableInfo {
-  private String name;
+class LetInfo(private val let: LetExpression) : VariableInfo(let.location) {
+    override val name: String
+        get() = let.variable
 
-  public ParameterInfo(String name, Location location) {
-    super(location);
-    this.name = name;
-  }
+    override val isLet: Boolean = true
 
-  public String getName() {
-    return name;
-  }
+    override val declaration: ExpressionNode
+        get() = let.declaration
 }

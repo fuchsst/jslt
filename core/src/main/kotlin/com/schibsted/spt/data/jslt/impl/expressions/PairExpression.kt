@@ -16,7 +16,6 @@ package com.schibsted.spt.data.jslt.impl.expressions
 import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
-import com.schibsted.spt.data.jslt.impl.AbstractNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 
@@ -40,11 +39,11 @@ class PairExpression(private var key: ExpressionNode, private var value: Express
             return key.apply(null, null).asText()
         }
 
-    override fun apply(scope: Scope, input: JsonNode): JsonNode {
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         return value.apply(scope, input)
     }
 
-    override fun computeMatchContexts(parent: DotExpression) {
+    override fun computeMatchContexts(parent: DotExpression?) {
         // a pair that has a dynamic key cannot use matching in the value
         val expr: DotExpression = if (isKeyLiteral)
             DotExpression(staticKey, parent, location)

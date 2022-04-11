@@ -15,7 +15,6 @@ package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.schibsted.spt.data.jslt.Callable
 import com.schibsted.spt.data.jslt.JsltException
-import com.schibsted.spt.data.jslt.impl.AbstractNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 
@@ -43,7 +42,7 @@ abstract class AbstractInvocationExpression(
         }
     }
 
-    override fun computeMatchContexts(parent: DotExpression) {
+    override fun computeMatchContexts(parent: DotExpression?) {
         arguments.forEach { arg ->
             arg.computeMatchContexts(parent)
         }

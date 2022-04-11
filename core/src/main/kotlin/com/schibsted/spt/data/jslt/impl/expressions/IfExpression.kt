@@ -15,7 +15,6 @@ package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
-import com.schibsted.spt.data.jslt.impl.AbstractNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.PreparationContext
 import com.schibsted.spt.data.jslt.impl.Scope
@@ -33,20 +32,21 @@ class IfExpression(
     private var orelse: ExpressionNode?,
     location: Location?
 ) : AbstractNode(location) {
-    override fun apply(scope: Scope, input: JsonNode): JsonNode {
+
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         if (isTrue(test.apply(scope, input))) {
-            evalLets(scope, input, thenlets)
+            evalLets(scope!!, input!!, thenlets)
             return then.apply(scope, input)
         }
 
         // test was false, so return null or else
         return if (orelse != null) {
-            evalLets(scope, input, elselets)
+            evalLets(scope!!, input!!, elselets)
             orelse!!.apply(scope, input)
         } else NullNode.instance
     }
 
-    override fun computeMatchContexts(parent: DotExpression) {
+    override fun computeMatchContexts(parent: DotExpression?) {
         for (ix in thenlets.indices) thenlets[ix].computeMatchContexts(parent)
         then.computeMatchContexts(parent)
         if (orelse != null) {

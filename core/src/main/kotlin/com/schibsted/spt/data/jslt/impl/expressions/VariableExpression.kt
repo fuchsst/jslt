@@ -13,21 +13,17 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.*
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils
-import com.schibsted.spt.data.jslt.impl.expressions.LiteralExpression
+import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 
 class VariableExpression(val variable: String, location: Location?) : AbstractNode(location) {
-    private var slot: Int= ScopeManager.UNFOUND
+    private var slot: Int = ScopeManager.UNFOUND
     private var info: VariableInfo? = null
-    override fun apply(scope: Scope, input: JsonNode): JsonNode {
-        return scope.getValue(slot) ?: throw JsltException(
-            "No such variable '$variable'",
-            location
-        )
+
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+        return scope?.getValue(slot) ?: throw JsltException("No such variable '$variable'", location)
     }
 
     override fun dump(level: Int) {

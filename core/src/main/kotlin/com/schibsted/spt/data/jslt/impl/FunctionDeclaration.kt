@@ -20,8 +20,10 @@ import com.schibsted.spt.data.jslt.impl.expressions.*
 import com.schibsted.spt.data.jslt.impl.util.NodeUtils.evalLets
 
 class FunctionDeclaration(
-    override val name: String, private val parameters: Array<String>,
-    private val lets: Array<LetExpression>, private var body: ExpressionNode
+    override val name: String,
+    private val parameters: Array<String>,
+    private val lets: Array<LetExpression>,
+    private var body: ExpressionNode
 ) : AbstractNode(null), Function, ExpressionNode {
     private val parameterSlots: IntArray = IntArray(parameters.size)
 
@@ -39,7 +41,7 @@ class FunctionDeclaration(
         throw JsltException("INTERNAL ERROR!")
     }
 
-    fun call(scope: Scope, input: JsonNode, arguments: Array<JsonNode?>): JsonNode {
+    fun call(scope: Scope, input: JsonNode, arguments: Array<JsonNode>): JsonNode {
         scope.enterFunction(stackFrameSize)
 
         // bind the arguments into the function scope
@@ -62,7 +64,7 @@ class FunctionDeclaration(
 
     // the ExpressionNode API requires this method, but it doesn't
     // actually make any sense for a Function
-    override fun apply(scope: Scope, context: JsonNode): JsonNode {
+    override fun apply(scope: Scope?, context: JsonNode?): JsonNode {
         throw JsltException("INTERNAL ERROR")
     }
 

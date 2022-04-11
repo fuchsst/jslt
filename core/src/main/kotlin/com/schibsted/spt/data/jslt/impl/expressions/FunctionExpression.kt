@@ -25,10 +25,9 @@ class FunctionExpression(
     val functionName: String, arguments: Array<ExpressionNode>,
     location: Location?
 ) : AbstractInvocationExpression(arguments, location) {
-    private var function // null before resolution
-            : Function? = null
-    private var declared // non-null if a declared function
-            : FunctionDeclaration? = null
+    private var function: Function? = null // null before resolution
+    private var declared: FunctionDeclaration? = null // non-null if a declared function
+
 
     override fun resolve(callable: Callable) {
         super.resolve(callable)
@@ -36,17 +35,14 @@ class FunctionExpression(
         if (callable is FunctionDeclaration) declared = callable
     }
 
-    override fun apply(scope: Scope, input: JsonNode): JsonNode? {
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         val params = arguments.map { it.apply(scope, input) }.toTypedArray()
 
-        return if (declared != null) declared!!.call(scope, input, params) else {
-            var value = function!!.call(input, params)
-
+        return if (declared != null) declared!!.call(scope!!, input!!, params) else {
             // if the user-implemented function returns Java null, silently
             // turn it into a JSON null. (the alternative is to throw an
             // exception.)
-            if (value == null) value = NullNode.instance
-            value
+            function!!.call(input!!, params) ?: NullNode.instance
         }
     }
 

@@ -15,27 +15,21 @@ package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
-import com.schibsted.spt.data.jslt.impl.AbstractNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 
 open class DotExpression(private var key: String? = null, private var parent: ExpressionNode? = null, location: Location?) : AbstractNode(location) {
 
-    override fun apply(scope: Scope, input: JsonNode): JsonNode {
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         // if there is no key we just return the input
-        if (key == null) return input
-
-        var input = input
-
+        if (key == null) return input!!
 
         // if we have a parent, get the input from the parent (preceding expr)
-        if (parent != null) input = parent!!.apply(scope, input)
+        val lookupNode = if (parent != null) parent!!.apply(scope, input) else input!!
 
         // okay, do the keying
-        var value = input[key]
-        if (value == null) value = NullNode.instance
-        return value
+        return lookupNode[key] ?: NullNode.instance
     }
 
     override fun getChildren(): List<ExpressionNode> {

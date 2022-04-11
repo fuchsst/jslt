@@ -16,6 +16,7 @@ package com.schibsted.spt.data.jslt.impl
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.filters.JsonFilter
+import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
 import com.schibsted.spt.data.jslt.impl.util.NodeUtils
@@ -32,7 +33,8 @@ class ObjectComprehension(
     location: Location?,
     private val filter: JsonFilter
 ) : AbstractNode(location) {
-    override fun apply(scope: Scope, input: JsonNode): JsonNode {
+
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         var sequence = loop.apply(scope, input)
         if (sequence.isNull) return sequence else if (sequence.isObject) sequence =
             convertObjectToArray(sequence) else if (!sequence.isArray) throw JsltException(
@@ -43,7 +45,7 @@ class ObjectComprehension(
             val context = sequence[ix]
 
             // must evaluate lets over again for each value because of context
-            if (lets.isNotEmpty()) evalLets(scope, context, lets)
+            if (lets.isNotEmpty()) evalLets(scope!!, context, lets)
             if (ifExpr == null || isTrue(ifExpr!!.apply(scope, context))) {
                 val valueNode = value.apply(scope, context)
                 if (filter.filter(valueNode)) {
@@ -63,7 +65,7 @@ class ObjectComprehension(
     override fun prepare(ctx: PreparationContext) {
         ctx.scope.enterScope()
         for (ix in lets.indices) lets[ix].register(ctx.scope)
-        for (child in children) child.prepare(ctx)
+        for (child in getChildren()) child.prepare(ctx)
         ctx.scope.leaveScope()
     }
 

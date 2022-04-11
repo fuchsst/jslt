@@ -26,8 +26,8 @@ class MacroExpression(
 ) : AbstractInvocationExpression(arguments, location) {
     private val macro: Macro
 
-    override fun apply(scope: Scope, input: JsonNode): JsonNode? {
-        return macro.call(scope, input, arguments)
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+        return macro.call(scope!!, input!!, arguments)!!
     }
 
     init {

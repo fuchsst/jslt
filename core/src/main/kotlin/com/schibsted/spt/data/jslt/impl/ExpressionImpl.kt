@@ -38,7 +38,7 @@ class ExpressionImpl(
     // contains the mapping from external parameters (variables set from
     // outside at query-time) to slots, so that we can put the
     // parameters into the scope when evaluating the query
-    private var parameterSlots: Map<String, Int>? = null
+    private var parameterSlots: Map<String, Int> = emptyMap()
 
     fun getFunction(name: String): Function {
         return functions[name] ?: throw JsltException("Function '$name' not found!")

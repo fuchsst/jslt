@@ -23,11 +23,11 @@ class LetExpression(val variable: String, var declaration: ExpressionNode, locat
         private set
     private var info: VariableInfo? = null
 
-    override fun apply(scope: Scope, input: JsonNode): JsonNode {
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         return declaration.apply(scope, input)
     }
 
-    override fun computeMatchContexts(parent: DotExpression) {
+    override fun computeMatchContexts(parent: DotExpression?) {
         declaration.computeMatchContexts(parent)
     }
 

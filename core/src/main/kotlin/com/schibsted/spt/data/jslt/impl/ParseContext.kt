@@ -100,7 +100,7 @@ class ParseContext(
             val name = `fun`!!.functionName
             val f = getFunction(name) ?: throw JsltException(
                 "No such function: '$name'",
-                `fun`.getLocation()
+                `fun`.location
             )
             `fun`.resolve(f)
         }

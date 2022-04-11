@@ -16,7 +16,6 @@ package com.schibsted.spt.data.jslt.impl.expressions
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.schibsted.spt.data.jslt.JsltException
-import com.schibsted.spt.data.jslt.impl.AbstractNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.PreparationContext
 import com.schibsted.spt.data.jslt.impl.Scope
@@ -33,7 +32,7 @@ class ForExpression(
     private var ifExpr: ExpressionNode?,
     location: Location?
 ) : AbstractNode(location) {
-    override fun apply(scope: Scope, input: JsonNode): JsonNode {
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         var array = valueExpr.apply(scope, input)
         if (array.isNull) return NullNode.instance else if (array.isObject) array =
             convertObjectToArray(array) else if (!array.isArray) throw JsltException(
@@ -44,13 +43,13 @@ class ForExpression(
             val value = array[ix]
 
             // must evaluate lets over again for each value because of context
-            if (lets.size > 0) evalLets(scope, value, lets)
+            if (lets.size > 0) evalLets(scope!!, value, lets)
             if (ifExpr == null || isTrue(ifExpr!!.apply(scope, value))) result.add(loopExpr.apply(scope, value))
         }
         return result
     }
 
-    override fun computeMatchContexts(parent: DotExpression) {
+    override fun computeMatchContexts(parent: DotExpression?) {
         // if you do matching inside a 'for' the matching is on the
         // current object being traversed in the list. so we forget the
         // parent and start over
@@ -68,7 +67,7 @@ class ForExpression(
     override fun prepare(ctx: PreparationContext) {
         ctx.scope.enterScope()
         lets.forEach { it.register(ctx.scope) }
-        children.forEach { it.prepare(ctx) }
+        getChildren().forEach { it.prepare(ctx) }
         ctx.scope.leaveScope()
     }
 
