@@ -13,16 +13,15 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt
 
-import com.schibsted.spt.data.jslt.impl.util.ClasspathResourceResolver
 import com.schibsted.spt.data.jslt.filters.DefaultJsonFilter
 import com.schibsted.spt.data.jslt.filters.JsltJsonFilter
-import com.schibsted.spt.data.jslt.impl.ParseContext
-import com.schibsted.spt.data.jslt.impl.PreparationContext
-import com.schibsted.spt.data.jslt.parser.JsltParser
-import kotlin.jvm.JvmOverloads
 import com.schibsted.spt.data.jslt.filters.JsonFilter
 import com.schibsted.spt.data.jslt.impl.JsltFile
-import com.schibsted.spt.data.jslt.parser.ParserImpl
+import com.schibsted.spt.data.jslt.impl.ParseContext
+import com.schibsted.spt.data.jslt.impl.PreparationContext
+import com.schibsted.spt.data.jslt.impl.util.ClasspathResourceResolver
+import com.schibsted.spt.data.jslt.parser.JsltParser
+import com.schibsted.spt.data.jslt.parser.compileExpression
 import java.io.*
 
 /**
@@ -109,24 +108,20 @@ class Parser private constructor(
      * returns false when given the value, the key/value pair is
      * omitted.
      */
-    fun withObjectFilter(filter: JsonFilter): Parser {
-        return Parser(
-            source, reader, functions, resolver, modules,
-            filter
-        )
-    }
+    fun withObjectFilter(filter: JsonFilter): Parser =
+        Parser(source, reader, functions, resolver, modules, filter)
 
     /**
      * Compile the JSLT from the defined parameters.
      */
     fun compile(): Expression {
-        val ctx = ParseContext(
+        val context = ParseContext(
             functions, source, resolver, modules,
             emptyList<JsltFile>().toMutableList(),
             PreparationContext(),
             objectFilter
         )
-        return ParserImpl.compileExpression(ctx, JsltParser(reader))
+        return context.compileExpression(JsltParser(reader))
     }
 
     companion object {
@@ -134,7 +129,7 @@ class Parser private constructor(
          * Compile the given JSLT file with the given predefined functions.
          */
         @JvmOverloads
-        fun compile(jslt: File, functions: Collection<Function> =emptySet()): Expression {
+        fun compile(jslt: File, functions: Collection<Function> = emptySet()): Expression {
             try {
                 FileReader(jslt).use { f ->
                     return Parser(f)
@@ -148,6 +143,7 @@ class Parser private constructor(
                 throw JsltException("Couldn't read file $jslt", e)
             }
         }
+
         /**
          * Compile JSLT expression given as an inline string with the given
          * extension functions.
@@ -163,6 +159,7 @@ class Parser private constructor(
                 .withFunctions(functions)
                 .compile()
         }
+
         /**
          * Load and compile JSLT expression from the classpath with the
          * given extension functions.
