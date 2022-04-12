@@ -14,8 +14,6 @@
 package com.schibsted.spt.data.jslt
 
 import com.schibsted.spt.data.jslt.impl.Location
-import kotlin.jvm.JvmOverloads
-import java.lang.RuntimeException
 
 /**
  * Parent exception for all exceptions thrown by JSLT for both

@@ -24,16 +24,13 @@ class PipeOperator(
     left: ExpressionNode, right: ExpressionNode,
     location: Location?
 ) : AbstractOperator(left, right, "|", location) {
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
-        return right.apply(scope, left.apply(scope, input))
-    }
+
+    override fun apply(scope: Scope?, input: JsonNode?): JsonNode = right.apply(scope, left.apply(scope, input))
 
     override fun computeMatchContexts(parent: DotExpression?) {
         left.computeMatchContexts(parent)
-        right.computeMatchContexts(DotExpression(location =  Location(null, 0, 0)))
+        right.computeMatchContexts(DotExpression(location = Location(null, 0, 0)))
     }
 
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode {
-        throw JsltException("this should NOT be reachable")
-    }
+    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = throw JsltException("this should NOT be reachable")
 }

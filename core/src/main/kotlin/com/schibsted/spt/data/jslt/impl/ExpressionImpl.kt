@@ -21,7 +21,7 @@ import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.expressions.DotExpression
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.evalLets
+import com.schibsted.spt.data.jslt.impl.util.evalLets
 
 /**
  * Wrapper class that translates an external Expression to an
@@ -102,7 +102,7 @@ class ExpressionImpl(
         if (actual != null) actual = actual!!.optimize()
     }
 
-    val children: List<ExpressionNode>
+    private val children: List<ExpressionNode>
         get() {
             return lets.toList() +
                     functions.values.asSequence().filterIsInstance<FunctionDeclaration>() +

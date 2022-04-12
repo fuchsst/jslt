@@ -18,10 +18,13 @@ import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.filters.JsonFilter
-import com.schibsted.spt.data.jslt.impl.*
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.evalLets
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
+import com.schibsted.spt.data.jslt.impl.Location
+import com.schibsted.spt.data.jslt.impl.OptimizerScope
+import com.schibsted.spt.data.jslt.impl.PreparationContext
+import com.schibsted.spt.data.jslt.impl.Scope
+import com.schibsted.spt.data.jslt.impl.util.objectMapper
+import com.schibsted.spt.data.jslt.impl.util.evalLets
+import com.schibsted.spt.data.jslt.impl.util.indent
 
 class ObjectExpression(
     private val lets: Array<LetExpression>,
@@ -48,7 +51,7 @@ class ObjectExpression(
 
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         evalLets(scope!!, input!!, lets)
-        val `object` = NodeUtils.mapper.createObjectNode()
+        val `object` = objectMapper.createObjectNode()
         for (ix in children.indices) {
             val value = children[ix].apply(scope, input)
             if (filter.filter(value)) {

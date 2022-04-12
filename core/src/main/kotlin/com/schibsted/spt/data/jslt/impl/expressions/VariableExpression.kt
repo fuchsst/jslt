@@ -16,7 +16,7 @@ package com.schibsted.spt.data.jslt.impl.expressions
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.*
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
+import com.schibsted.spt.data.jslt.impl.util.indent
 
 class VariableExpression(val variable: String, location: Location?) : AbstractNode(location) {
     private var slot: Int = ScopeManager.UNFOUND

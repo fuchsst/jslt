@@ -11,7 +11,7 @@ class TestFunction : Function {
     override val maxArguments: Int
         get() = 0
 
-    override fun call(input: JsonNode, params: Array<JsonNode>): JsonNode? {
+    override fun call(input: JsonNode, arguments: Array<JsonNode>): JsonNode? {
         return IntNode(42)
     }
 }

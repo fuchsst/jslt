@@ -19,8 +19,8 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
+import com.schibsted.spt.data.jslt.impl.util.indent
+import com.schibsted.spt.data.jslt.impl.util.objectMapper
 
 /**
  * Indexing and slicing of arrays and also strings.
@@ -52,7 +52,7 @@ class ArraySlicer(// can be null
         var rightix = resolveIndex(scope, right, input, size, size)
         if (rightix > size) rightix = size
         return if (sequence.isArray) {
-            val result = NodeUtils.mapper.createArrayNode()
+            val result = objectMapper.createArrayNode()
             for (ix in leftix until rightix) result.add(sequence[ix])
             result
         } else {

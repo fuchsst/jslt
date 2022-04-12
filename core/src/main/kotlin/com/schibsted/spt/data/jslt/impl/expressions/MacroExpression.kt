@@ -14,7 +14,9 @@
 package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.schibsted.spt.data.jslt.impl.*
+import com.schibsted.spt.data.jslt.impl.Location
+import com.schibsted.spt.data.jslt.impl.Macro
+import com.schibsted.spt.data.jslt.impl.Scope
 
 // not sure we actually need this ExpressionNode class. maybe macros
 // should be expressions in their own right? it does mean we get to

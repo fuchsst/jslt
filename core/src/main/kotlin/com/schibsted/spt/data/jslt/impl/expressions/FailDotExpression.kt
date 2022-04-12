@@ -13,7 +13,6 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.schibsted.spt.data.jslt.impl.expressions.DotExpression
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.Location
 

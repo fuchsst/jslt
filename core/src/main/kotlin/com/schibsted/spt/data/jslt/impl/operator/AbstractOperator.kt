@@ -14,13 +14,13 @@
 package com.schibsted.spt.data.jslt.impl.operator
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
+import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
 import com.schibsted.spt.data.jslt.impl.expressions.DotExpression
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.expressions.LiteralExpression
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
+import com.schibsted.spt.data.jslt.impl.util.indent
 
 /**
  * Shared abstract superclass for comparison operators and others.

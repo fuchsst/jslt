@@ -14,7 +14,8 @@
 package com.schibsted.spt.data.jslt.filters
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.isValue
+import com.schibsted.spt.data.jslt.impl.util.isValue
+
 
 /**
  * The filter that JSLT uses by default.

@@ -13,15 +13,15 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils
+import com.schibsted.spt.data.jslt.impl.util.indent
+import com.schibsted.spt.data.jslt.impl.util.objectMapper
 
 class ArrayExpression(private val children: Array<ExpressionNode>, location: Location?) : AbstractNode(location) {
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
-        return NodeUtils.mapper.createArrayNode().addAll(
+        return objectMapper.createArrayNode().addAll(
             children.map { it.apply(scope, input) }
         )
     }

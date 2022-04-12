@@ -23,6 +23,7 @@ class MultiplyOperator(
     left: ExpressionNode, right: ExpressionNode,
     location: Location?
 ) : NumericOperator(left, right, "*", location) {
+
     override fun perform(v1: JsonNode, v2: JsonNode): JsonNode {
         return if (v1.isTextual || v2.isTextual) {
             // if one operand is string: do string multiplication
@@ -46,11 +47,7 @@ class MultiplyOperator(
             super.perform(v1, v2)
     }
 
-    override fun perform(v1: Double, v2: Double): Double {
-        return v1 * v2
-    }
+    override fun perform(v1: Double, v2: Double): Double = v1 * v2
 
-    override fun perform(v1: Long, v2: Long): Long {
-        return v1 * v2
-    }
+    override fun perform(v1: Long, v2: Long): Long = v1 * v2
 }

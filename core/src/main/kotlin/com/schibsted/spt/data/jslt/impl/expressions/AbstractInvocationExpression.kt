@@ -16,7 +16,7 @@ package com.schibsted.spt.data.jslt.impl.expressions
 import com.schibsted.spt.data.jslt.Callable
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.Location
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
+import com.schibsted.spt.data.jslt.impl.util.indent
 
 /**
  * Common superclass for function and macro expressions, to avoid

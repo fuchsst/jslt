@@ -13,16 +13,15 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator
 
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.toJson
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
+import com.schibsted.spt.data.jslt.impl.util.toJsonNode
 
 class UnequalsComparison(
     left: ExpressionNode, right: ExpressionNode,
     location: Location?
 ) : AbstractOperator(left, right, "!=", location) {
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode {
-        return toJson(!EqualsComparison.Companion.equals(v1, v2))
-    }
+
+    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = (!EqualsComparison.equals(v1, v2)).toJsonNode()
 }

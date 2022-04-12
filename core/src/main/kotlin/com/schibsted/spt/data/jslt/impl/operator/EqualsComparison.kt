@@ -16,15 +16,14 @@ package com.schibsted.spt.data.jslt.impl.operator
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.toJson
+import com.schibsted.spt.data.jslt.impl.util.toJsonNode
 
 class EqualsComparison(
     left: ExpressionNode, right: ExpressionNode,
     location: Location?
 ) : AbstractOperator(left, right, "==", location) {
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode {
-        return toJson(equals(v1, v2))
-    }
+
+    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = equals(v1, v2).toJsonNode()
 
     companion object {
         fun equals(v1: JsonNode, v2: JsonNode): Boolean {

@@ -13,13 +13,13 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator
 
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.number
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.LongNode
 import com.fasterxml.jackson.databind.node.DoubleNode
+import com.fasterxml.jackson.databind.node.LongNode
+import com.fasterxml.jackson.databind.node.NullNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
+import com.schibsted.spt.data.jslt.impl.util.number
 
 class DivideOperator(
     left: ExpressionNode, right: ExpressionNode,
@@ -38,12 +38,8 @@ class DivideOperator(
         } else DoubleNode(perform(dividend.doubleValue(), divisor.doubleValue()))
     }
 
-    override fun perform(v1: Double, v2: Double): Double {
-        return v1 / v2
-    }
+    override fun perform(v1: Double, v2: Double): Double = v1 / v2
 
     // can't use this, because the integers are not closed under division
-    override fun perform(v1: Long, v2: Long): Long {
-        return v1 / v2 // uhh ... ?
-    }
+    override fun perform(v1: Long, v2: Long): Long = v1 / v2 // uhh ... ?
 }

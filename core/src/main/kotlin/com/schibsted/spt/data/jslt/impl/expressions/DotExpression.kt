@@ -17,9 +17,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
+import com.schibsted.spt.data.jslt.impl.util.indent
 
-open class DotExpression(private var key: String? = null, private var parent: ExpressionNode? = null, location: Location?) : AbstractNode(location) {
+open class DotExpression(
+    private var key: String? = null,
+    private var parent: ExpressionNode? = null,
+    location: Location?
+) : AbstractNode(location) {
 
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         // if there is no key we just return the input

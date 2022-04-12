@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.expressions.*
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.evalLets
+import com.schibsted.spt.data.jslt.impl.util.evalLets
 
 class FunctionDeclaration(
     override val name: String,
@@ -30,7 +30,7 @@ class FunctionDeclaration(
     private var stackFrameSize = 0
 
     override val minArguments: Int = parameters.size
-    override val maxArguments: Int=parameters.size
+    override val maxArguments: Int = parameters.size
 
     // this method is here because the Function signature requires it,
     // but we can't actually use it, because a declared function needs

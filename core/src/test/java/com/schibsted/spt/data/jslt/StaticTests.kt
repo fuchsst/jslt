@@ -24,7 +24,7 @@ class StaticTests : TestBase() {
     fun testExceptionWithNoLocation() {
         try {
             val expr = compileString("contains(2, 2)")
-            val actual = expr.apply(null)
+            expr.apply(null)
         } catch (e: JsltException) {
             Assert.assertTrue(e.getSource() == null)
             Assert.assertEquals(-1, e.getLine().toLong())
@@ -82,7 +82,7 @@ class StaticTests : TestBase() {
         val now1 = execute("{}", "now()")
         val now2 = System.currentTimeMillis().toDouble()
         val delta: Long = 1000 // milliseconds of wriggle-room
-        Assert.assertTrue(now1!!.isDouble)
+        Assert.assertTrue(now1.isDouble)
         Assert.assertTrue(
             "now1 ($now1) << now2 ($now2)",
             now1.asDouble() * 1000 < now2 + delta

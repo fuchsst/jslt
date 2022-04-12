@@ -14,8 +14,11 @@
 package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.schibsted.spt.data.jslt.impl.*
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
+import com.schibsted.spt.data.jslt.impl.Location
+import com.schibsted.spt.data.jslt.impl.Scope
+import com.schibsted.spt.data.jslt.impl.ScopeManager
+import com.schibsted.spt.data.jslt.impl.VariableInfo
+import com.schibsted.spt.data.jslt.impl.util.indent
 
 class LetExpression(val variable: String, var declaration: ExpressionNode, location: Location?) :
     AbstractNode(location) {

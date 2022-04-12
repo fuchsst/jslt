@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.node.LongNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.number
+import com.schibsted.spt.data.jslt.impl.util.number
 
 abstract class NumericOperator(
     left: ExpressionNode, right: ExpressionNode, name: String,

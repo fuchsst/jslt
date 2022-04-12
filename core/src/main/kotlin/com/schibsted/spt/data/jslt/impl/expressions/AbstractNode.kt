@@ -15,7 +15,7 @@ package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.PreparationContext
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
+import com.schibsted.spt.data.jslt.impl.util.indent
 
 abstract class AbstractNode(var location: Location?) : ExpressionNode {
     override fun dump(level: Int) {

@@ -13,29 +13,26 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator
 
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.isTrue
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.toJson
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.BooleanNode
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
-import com.schibsted.spt.data.jslt.impl.operator.EqualsComparison
-import kotlin.jvm.JvmOverloads
+import com.schibsted.spt.data.jslt.impl.util.isTrue
+import com.schibsted.spt.data.jslt.impl.util.toJsonNode
 
 class AndOperator(
     left: ExpressionNode, right: ExpressionNode,
     location: Location?
 ) : AbstractOperator(left, right, "and", location) {
+
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
-        val v1 = isTrue(left.apply(scope, input))
+        val v1 = left.apply(scope, input).isTrue()
         if (!v1) return BooleanNode.FALSE
-        val v2 = isTrue(right.apply(scope, input))
-        return toJson(v1 && v2)
+        val v2 = right.apply(scope, input).isTrue()
+        return v2.toJsonNode()
     }
 
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode {
-        throw JsltException("Not implemented")
-    }
+    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = throw JsltException("Not implemented")
 }

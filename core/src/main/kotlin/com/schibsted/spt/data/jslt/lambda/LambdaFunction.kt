@@ -14,7 +14,8 @@
 package com.schibsted.spt.data.jslt.lambda
 
 import com.schibsted.spt.data.jslt.Parser.Companion.compileString
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils
+import com.schibsted.spt.data.jslt.impl.util.objectMapper
+
 
 /**
  * A lambda function used to create the online demo playground via
@@ -29,14 +30,14 @@ class LambdaFunction {
         return try {
             // this must be:
             // {"json" : ..., "jslt" : jslt}
-            val input = NodeUtils.mapper.readTree(json)
+            val input = objectMapper.readTree(json)
 
             // now we can do the thing
-            val source = NodeUtils.mapper.readTree(input["json"].asText())
+            val source = objectMapper.readTree(input["json"].asText())
             val jslt = input["jstl"].asText()
             val template = compileString(jslt)
             val output = template.apply(source)
-            NodeUtils.mapper.writerWithDefaultPrettyPrinter().writeValueAsString(output)
+            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(output)
         } catch (e: Throwable) {
             "ERROR: $e"
         }

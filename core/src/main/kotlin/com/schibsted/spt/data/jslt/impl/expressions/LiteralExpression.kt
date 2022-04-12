@@ -13,13 +13,13 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
-import com.fasterxml.jackson.databind.JsonNode
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils
 import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
+import com.schibsted.spt.data.jslt.impl.util.indent
+import com.schibsted.spt.data.jslt.impl.util.objectMapper
 
 class LiteralExpression(private val value: JsonNode, location: Location?) : AbstractNode(location) {
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
@@ -32,7 +32,7 @@ class LiteralExpression(private val value: JsonNode, location: Location?) : Abst
 
     override fun toString(): String {
         return try {
-            NodeUtils.mapper.writeValueAsString(value)
+            objectMapper.writeValueAsString(value)
         } catch (e: JsonProcessingException) {
             throw JsltException("Couldn't serialize literal value: $e")
         }

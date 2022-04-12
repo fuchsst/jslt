@@ -13,12 +13,9 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.cli
 
-import kotlin.Throws
-import java.lang.Exception
-import kotlin.jvm.JvmStatic
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.schibsted.spt.data.jslt.Parser
 import java.io.File
 import kotlin.system.exitProcess

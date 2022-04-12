@@ -10,7 +10,7 @@ class TestNullFunction : Function {
     override val maxArguments: Int
         get() = 0
 
-    override fun call(input: JsonNode, params: Array<JsonNode>): JsonNode? {
+    override fun call(input: JsonNode, arguments: Array<JsonNode>): JsonNode? {
         // people are not supposed to do this, but they probably will
         return null
     }

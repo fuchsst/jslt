@@ -13,8 +13,6 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.util
 
-import java.util.LinkedHashMap
-
 /**
  * A Map implementation that deletes the oldest entry once the size
  * goes over a preset limit. This prevents the Map from growing

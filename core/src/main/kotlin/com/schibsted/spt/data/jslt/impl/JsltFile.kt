@@ -13,7 +13,6 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.schibsted.spt.data.jslt.impl.ExpressionImpl
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.Callable
 import com.schibsted.spt.data.jslt.Function

@@ -14,7 +14,6 @@
 package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.schibsted.spt.data.jslt.impl.expressions.DotExpression
 import com.schibsted.spt.data.jslt.impl.PreparationContext
 import com.schibsted.spt.data.jslt.impl.Scope
 

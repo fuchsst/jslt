@@ -14,7 +14,7 @@
 package com.schibsted.spt.data.jslt.impl
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.ArrayDeque
+import java.util.*
 
 open class Scope(stackFrameSize: Int) {
     private val globalStackFrame: Array<JsonNode?> = arrayOfNulls(stackFrameSize)

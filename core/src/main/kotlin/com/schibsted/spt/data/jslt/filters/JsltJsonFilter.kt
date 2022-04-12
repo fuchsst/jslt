@@ -15,7 +15,8 @@ package com.schibsted.spt.data.jslt.filters
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.Expression
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.isTrue
+import com.schibsted.spt.data.jslt.impl.util.isTrue
+
 
 /**
  * Used for object filtering with JSLT expressions.
@@ -24,5 +25,5 @@ class JsltJsonFilter(private val jslt: Expression) : JsonFilter {
     /**
      * Whether or not to accept this value.
      */
-    override fun filter(value: JsonNode): Boolean = isTrue(jslt.apply(value))
+    override fun filter(value: JsonNode): Boolean = jslt.apply(value).isTrue()
 }

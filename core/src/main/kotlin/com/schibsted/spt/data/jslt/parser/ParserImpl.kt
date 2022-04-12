@@ -81,7 +81,7 @@ private fun ParseContext.compile(root: SimpleNode): ExpressionImpl {
     val lets = buildLets(root)
     collectFunctions(root) // registered with context
     val expr = root.getLastChild()
-    val top: ExpressionNode? =     if (expr!!.id == JsltParserTreeConstants.JJTEXPR) node2expr(expr) else null
+    val top: ExpressionNode? = if (expr!!.id == JsltParserTreeConstants.JJTEXPR) node2expr(expr) else null
     resolveFunctions()
     val impl = ExpressionImpl(lets, this.declaredFunctions, top)
     impl.prepare(this.preparationContext)

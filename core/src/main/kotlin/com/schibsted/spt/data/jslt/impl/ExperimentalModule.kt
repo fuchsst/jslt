@@ -20,8 +20,8 @@ import com.schibsted.spt.data.jslt.Callable
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.Module
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.convertObjectToArray
+import com.schibsted.spt.data.jslt.impl.util.convertObjectToArray
+import com.schibsted.spt.data.jslt.impl.util.objectMapper
 
 /**
  * A module containing functions and macros that *may* be officially
@@ -30,7 +30,7 @@ import com.schibsted.spt.data.jslt.impl.util.NodeUtils.convertObjectToArray
  * implementations.
  */
 class ExperimentalModule : Module {
-    private val callables: MutableMap<String?, Callable?> = HashMap<String?, Callable?>()
+    private val callables: MutableMap<String?, Callable?> = HashMap()
     override fun getCallable(name: String): Callable {
         return callables[name]!!
     }
@@ -50,28 +50,28 @@ class ExperimentalModule : Module {
             // first find the array that we iterate over
             var array = parameters[0].apply(scope, input)
             if (array.isNull) return NullNode.instance else if (array.isObject) array =
-                convertObjectToArray(array) else if (!array.isArray) throw JsltException(
+                array.convertObjectToArray() else if (!array.isArray) throw JsltException(
                 "Can't group-by on $array"
             )
 
             // now start grouping
-            val groups: MutableMap<JsonNode?, ArrayNode?> = HashMap<JsonNode?, ArrayNode?>()
+            val groups: MutableMap<JsonNode?, ArrayNode?> = HashMap()
             for (ix in 0 until array.size()) {
                 val groupInput = array[ix]
                 val key = parameters[1].apply(scope, groupInput)
                 val value = parameters[2].apply(scope, groupInput)
                 var values = groups[key]
                 if (values == null) {
-                    values = NodeUtils.mapper.createArrayNode()
+                    values = objectMapper.createArrayNode()
                     groups[key] = values
                 }
                 values!!.add(value)
             }
 
             // grouping is done, build JSON output
-            val result = NodeUtils.mapper.createArrayNode()
+            val result = objectMapper.createArrayNode()
             for (key in groups.keys) {
-                val group = NodeUtils.mapper.createObjectNode()
+                val group = objectMapper.createObjectNode()
                 group.set<JsonNode>("key", key)
                 group.set<JsonNode>("values", groups[key])
                 result.add(group)

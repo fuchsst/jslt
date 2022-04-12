@@ -23,187 +23,163 @@ import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
 import java.math.BigInteger
 import kotlin.math.pow
 
-object NodeUtils {
-    @JvmField
-    val mapper = ObjectMapper()
 
-    @JvmStatic
-    fun evalLets(scope: Scope, input: JsonNode, lets: Array<LetExpression>?) {
-        if (lets == null) return
-        for (ix in lets.indices) {
-            // val `var` = lets[ix].variable
-            val `val` = lets[ix].apply(scope, input)
-            scope.setValue(lets[ix].slot, `val`)
-        }
-    }
+val objectMapper = ObjectMapper()
 
-    @JvmStatic
-    fun isTrue(value: JsonNode): Boolean {
-        return value !== BooleanNode.FALSE &&
-                !(value.isObject && value.size() == 0) &&
-                !(value.isTextual && value.asText().isEmpty()) &&
-                !(value.isArray && value.size() == 0) &&
-                !(value.isNumber && value.doubleValue() == 0.0) &&
-                !value.isNull
-    }
-
-    @JvmStatic
-    fun isValue(value: JsonNode): Boolean {
-        return !value.isNull &&
-                !(value.isObject && value.size() == 0) &&
-                !(value.isArray && value.size() == 0)
-    }
-
-    @JvmStatic
-    fun toJson(value: Boolean): JsonNode {
-        return if (value) BooleanNode.TRUE else BooleanNode.FALSE
-    }
-
-    @JvmStatic
-    fun toJson(value: Double): JsonNode {
-        return DoubleNode(value)
-    }
-
-    @JvmStatic
-    fun toJson(array: Array<String?>): JsonNode {
-        val node = mapper.createArrayNode()
-        for (ix in array.indices) node.add(array[ix])
-        return node
-    }
-
-    // nullok => return Java null for Json null
-    @JvmStatic
-    fun toString(value: JsonNode, nullok: Boolean): String? {
-        // check what type this is
-        if (value.isTextual) return value.asText() else if (value.isNull && nullok) return null
-
-        // not sure how well this works in practice, but let's try
-        return value.toString()
-    }
-
-    @JvmStatic
-    fun toArray(value: JsonNode, nullok: Boolean): ArrayNode? {
-        // check what type this is
-        if (value.isArray) return value as ArrayNode else if (value.isNull && nullok) return null
-        throw JsltException("Cannot convert $value to array")
-    }
-
-    @JvmStatic
-    fun number(value: JsonNode, loc: Location?): JsonNode {
-        return number(value, false, loc)
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun number(
-        value: JsonNode, strict: Boolean, loc: Location?,
-        fallback: JsonNode? = null
-    ): JsonNode {
-        // check what type this is
-        if (value.isNumber) return value else if (value.isNull) {
-            return fallback ?: value
-        } else if (!value.isTextual) {
-            return if (strict) throw JsltException(
-                "Can't convert $value to number",
-                loc
-            ) else fallback ?: NullNode.instance
-        }
-
-        // let's look at this number
-        val number = value.asText()
-        val numberNode = parseNumber(number)
-        return if (numberNode == null || !numberNode.isNumber) {
-            fallback ?: throw JsltException("number($number) failed: not a number", loc)
-        } else {
-            numberNode
-        }
-    }
-
-    // returns null in case of failure (caller then handles fallback)
-    private fun parseNumber(number: String): JsonNode? {
-        if (number.isEmpty()) return null
-        var pos = 0
-        if (number[0] == '-') {
-            pos = 1
-        }
-        val endInteger = scanDigits(number, pos)
-        if (endInteger == pos) return null
-        if (endInteger == number.length) {
-            return when {
-                number.length < 10 -> IntNode(number.toInt())
-                number.length < 19 -> LongNode(number.toLong())
-                else -> BigIntegerNode(BigInteger(number))
-            }
-        }
-
-        // since there's stuff after the initial integer it must be either
-        // the decimal part or the exponent
-        val intPart = number.substring(0, endInteger).toLong()
-        pos = endInteger
-        var value = intPart.toDouble()
-        if (number[pos] == '.') {
-            pos += 1
-            val endDecimal = scanDigits(number, pos)
-            if (endDecimal == pos) return null
-            var decimalPart = number.substring(endInteger + 1, endDecimal).toLong()
-            val digits = endDecimal - endInteger - 1
-
-            // if intPart is negative we can't add a positive decimalPart to it
-            if (intPart < 0) decimalPart *= -1
-            value = decimalPart / 10.0.pow(digits.toDouble()) + intPart
-            pos = endDecimal
-
-            // if there's nothing more, then this is it
-            if (pos == number.length) return DoubleNode(value)
-        }
-
-        // there is more: next character MUST be 'e' or 'E'
-        var ch = number[pos]
-        if (ch != 'e' && ch != 'E') return null
-
-        // now we must have either '-', '+', or an integer
-        pos++
-        if (pos == number.length) return null
-        ch = number[pos]
-        var sign = 1
-        if (ch == '+') pos++ else if (ch == '-') {
-            sign = -1
-            pos++
-        }
-        val endExponent = scanDigits(number, pos)
-        if (endExponent != number.length || endExponent == pos) return null
-        val exponent = number.substring(pos).toInt() * sign
-        return DoubleNode(value * 10.0.pow(exponent.toDouble()))
-    }
-
-    private fun scanDigits(number: String, pos: Int): Int {
-        var currentPos = pos
-        while (currentPos < number.length && isDigit(number[currentPos])) currentPos++
-        return currentPos
-    }
-
-    private fun isDigit(ch: Char): Boolean {
-        return ch in '0'..'9'
-    }
-
-    @JvmStatic
-    fun convertObjectToArray(`object`: JsonNode): ArrayNode {
-        val array = mapper.createArrayNode()
-        val it = `object`.fields()
-        while (it.hasNext()) {
-            val (key, value) = it.next()
-            val element = mapper.createObjectNode()
-            element.set<JsonNode>("key", TextNode(key))
-            element.set<JsonNode>("value", value)
-            array.add(element)
-        }
-        return array
-    }
-
-    @JvmStatic
-    fun indent(level: Int): String {
-        val indent = CharArray(level * 2)
-        for (ix in indent.indices) indent[ix] = ' '
-        return String(indent, 0, indent.size)
+fun evalLets(scope: Scope, input: JsonNode, lets: Array<LetExpression>?) {
+    if (lets == null) return
+    lets.forEach { let ->
+        // val `var` = lets[ix].variable
+        val value = let.apply(scope, input)
+        scope.setValue(let.slot, value)
     }
 }
+
+fun JsonNode.isTrue(): Boolean =
+    this !== BooleanNode.FALSE &&
+            !(isObject && size() == 0) &&
+            !(isTextual && asText().isEmpty()) &&
+            !(isArray && size() == 0) &&
+            !(isNumber && doubleValue() == 0.0) &&
+            !isNull
+
+fun isValue(value: JsonNode): Boolean = !(value.isNull || !value.isValueNode && value.isEmpty)
+
+fun Boolean.toJsonNode(): JsonNode = if (this) BooleanNode.TRUE else BooleanNode.FALSE
+
+fun Double.toJsonNode(): JsonNode = DoubleNode(this)
+
+fun toJsonNode(array:Array<String?>): JsonNode {
+    val elements = array.map { if (it == null) NullNode.instance else TextNode(it) }
+    return objectMapper.createArrayNode().addAll(elements)
+}
+
+
+fun JsonNode.asString(exceptionWhenNull: Exception = NullPointerException("JsonNode should not be NULL")): String {
+    if (isNull) throw exceptionWhenNull
+    // check what type this is
+    return if (isTextual) return asText() else toString()
+}
+
+fun JsonNode.asNullableString(): String? =
+    if (isTextual) // check what type this is
+        asText()
+    else if (!isNull)
+        toString()
+    else
+        null
+
+
+fun toArray(value: JsonNode, nullok: Boolean): ArrayNode? {
+    // check what type this is
+    if (value.isArray) return value as ArrayNode else if (value.isNull && nullok) return null
+    throw JsltException("Cannot convert $value to array")
+}
+
+fun number(value: JsonNode, loc: Location?): JsonNode {
+    return number(value, false, loc)
+}
+
+@JvmOverloads
+fun number(
+    value: JsonNode, strict: Boolean, loc: Location?,
+    fallback: JsonNode? = null
+): JsonNode {
+    // check what type this is
+    if (value.isNumber) return value else if (value.isNull) {
+        return fallback ?: value
+    } else if (!value.isTextual) {
+        return if (strict) throw JsltException(
+            "Can't convert $value to number",
+            loc
+        ) else fallback ?: NullNode.instance
+    }
+
+    // let's look at this number
+    val number = value.asText()
+    val numberNode = parseNumber(number)
+    return if (numberNode == null || !numberNode.isNumber) {
+        fallback ?: throw JsltException("number($number) failed: not a number", loc)
+    } else {
+        numberNode
+    }
+}
+
+// returns null in case of failure (caller then handles fallback)
+private fun parseNumber(number: String): JsonNode? {
+    if (number.isEmpty()) return null
+    var pos = 0
+    if (number[0] == '-') {
+        pos = 1
+    }
+    val endInteger = scanDigits(number, pos)
+    if (endInteger == pos) return null
+    if (endInteger == number.length) {
+        return when {
+            number.length < 10 -> IntNode(number.toInt())
+            number.length < 19 -> LongNode(number.toLong())
+            else -> BigIntegerNode(BigInteger(number))
+        }
+    }
+
+    // since there's stuff after the initial integer it must be either
+    // the decimal part or the exponent
+    val intPart = number.substring(0, endInteger).toLong()
+    pos = endInteger
+    var value = intPart.toDouble()
+    if (number[pos] == '.') {
+        pos += 1
+        val endDecimal = scanDigits(number, pos)
+        if (endDecimal == pos) return null
+        var decimalPart = number.substring(endInteger + 1, endDecimal).toLong()
+        val digits = endDecimal - endInteger - 1
+
+        // if intPart is negative we can't add a positive decimalPart to it
+        if (intPart < 0) decimalPart *= -1
+        value = decimalPart / 10.0.pow(digits.toDouble()) + intPart
+        pos = endDecimal
+
+        // if there's nothing more, then this is it
+        if (pos == number.length) return DoubleNode(value)
+    }
+
+    // there is more: next character MUST be 'e' or 'E'
+    var ch = number[pos]
+    if (ch != 'e' && ch != 'E') return null
+
+    // now we must have either '-', '+', or an integer
+    pos++
+    if (pos == number.length) return null
+    ch = number[pos]
+    var sign = 1
+    if (ch == '+') pos++ else if (ch == '-') {
+        sign = -1
+        pos++
+    }
+    val endExponent = scanDigits(number, pos)
+    if (endExponent != number.length || endExponent == pos) return null
+    val exponent = number.substring(pos).toInt() * sign
+    return DoubleNode(value * 10.0.pow(exponent.toDouble()))
+}
+
+private fun scanDigits(number: String, pos: Int): Int {
+    var currentPos = pos
+    while (currentPos < number.length && number[currentPos].isDigit()) currentPos++
+    return currentPos
+}
+
+fun JsonNode.convertObjectToArray(): ArrayNode {
+    val elements = fields().asSequence()
+        .map { (key, value) ->
+            objectMapper.createObjectNode().apply {
+                set<JsonNode>("key", TextNode(key))
+                set<JsonNode>("value", value)
+            }
+        }.toList()
+    return objectMapper.createArrayNode().apply {
+        addAll(elements)
+    }
+}
+
+fun indent(level: Int): String = " ".repeat(level * 2)
+

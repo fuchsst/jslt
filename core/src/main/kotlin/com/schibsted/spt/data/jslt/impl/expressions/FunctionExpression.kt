@@ -19,7 +19,7 @@ import com.schibsted.spt.data.jslt.Callable
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.*
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.toString
+import com.schibsted.spt.data.jslt.impl.util.asString
 
 class FunctionExpression(
     val functionName: String, arguments: Array<ExpressionNode>,
@@ -66,7 +66,7 @@ class FunctionExpression(
         if (function is RegexpFunction) {
             val ix = (function as RegexpFunction).regexpArgumentNumber()
             if (arguments[ix] is LiteralExpression) {
-                val r = toString(arguments[ix].apply(null, null), true) ?: throw JsltException("Regexp cannot be null")
+                val r = arguments[ix].apply(null, null).asString(JsltException("Regexp cannot be null"))
 
                 // will fill in cache, and throw correct exception
                 BuiltinFunctions.getRegexp(r)

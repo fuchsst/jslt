@@ -13,8 +13,6 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.schibsted.spt.data.jslt.impl.ScopeManager
-
 /**
  * Class to encapsulate context information while the parse tree is being
  * prepared.

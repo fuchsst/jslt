@@ -18,9 +18,9 @@ import com.fasterxml.jackson.databind.node.NullNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.PreparationContext
 import com.schibsted.spt.data.jslt.impl.Scope
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.evalLets
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.isTrue
+import com.schibsted.spt.data.jslt.impl.util.evalLets
+import com.schibsted.spt.data.jslt.impl.util.indent
+import com.schibsted.spt.data.jslt.impl.util.isTrue
 
 class IfExpression(
     private var test: ExpressionNode,
@@ -34,7 +34,7 @@ class IfExpression(
 ) : AbstractNode(location) {
 
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
-        if (isTrue(test.apply(scope, input))) {
+        if (test.apply(scope, input).isTrue()) {
             evalLets(scope!!, input!!, thenlets)
             return then.apply(scope, input)
         }

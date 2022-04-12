@@ -32,7 +32,7 @@ open class TestBase {
         try {
             val context = mapper.readTree(input)
             val expr = compileString(query, functions)
-            var actual: JsonNode? = expr.apply(variables, context) ?: throw JsltException("Returned Java null")
+            var actual: JsonNode? = expr.apply(variables, context)
 
             // reparse to handle IntNode(2) != LongNode(2)
             actual = mapper.readTree(mapper.writeValueAsString(actual))
@@ -86,7 +86,7 @@ open class TestBase {
         try {
             val context = mapper.readTree(input)
             val expr = compileString(query)
-            val actual = expr.apply(context)
+            expr.apply(context)
             Assert.fail("JSLT did not detect error")
         } catch (e: JsltException) {
             Assert.assertTrue(

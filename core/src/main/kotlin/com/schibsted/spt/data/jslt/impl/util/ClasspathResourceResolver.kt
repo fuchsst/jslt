@@ -13,12 +13,11 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.util
 
-import kotlin.jvm.JvmOverloads
-import java.nio.charset.Charset
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.ResourceResolver
 import java.io.InputStreamReader
 import java.io.Reader
+import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 
 class ClasspathResourceResolver @JvmOverloads constructor(private val charset: Charset = StandardCharsets.UTF_8) :

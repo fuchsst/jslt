@@ -1,12 +1,11 @@
 package com.schibsted.spt.data.jslt.impl.util
 
-import java.nio.charset.Charset
-import kotlin.jvm.JvmOverloads
-import java.nio.file.Path
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.ResourceResolver
 import java.io.*
+import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
+import java.nio.file.Path
 
 class FileSystemResourceResolver : ResourceResolver {
     private var rootPath // can be null

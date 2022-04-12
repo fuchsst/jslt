@@ -14,6 +14,5 @@
 package com.schibsted.spt.data.jslt.impl
 
 import com.schibsted.spt.data.jslt.Function
-import com.schibsted.spt.data.jslt.impl.AbstractCallable
 
 abstract class AbstractFunction(name: String, min: Int, max: Int) : AbstractCallable(name, min, max), Function

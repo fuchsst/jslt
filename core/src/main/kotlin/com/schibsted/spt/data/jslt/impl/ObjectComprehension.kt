@@ -19,10 +19,10 @@ import com.schibsted.spt.data.jslt.filters.JsonFilter
 import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.convertObjectToArray
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.evalLets
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.isTrue
+import com.schibsted.spt.data.jslt.impl.util.convertObjectToArray
+import com.schibsted.spt.data.jslt.impl.util.evalLets
+import com.schibsted.spt.data.jslt.impl.util.isTrue
+import com.schibsted.spt.data.jslt.impl.util.objectMapper
 
 class ObjectComprehension(
     private var loop: ExpressionNode,
@@ -37,16 +37,16 @@ class ObjectComprehension(
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         var sequence = loop.apply(scope, input)
         if (sequence.isNull) return sequence else if (sequence.isObject) sequence =
-            convertObjectToArray(sequence) else if (!sequence.isArray) throw JsltException(
+            sequence.convertObjectToArray() else if (!sequence.isArray) throw JsltException(
             "Object comprehension can't loop over $sequence", location
         )
-        val `object` = NodeUtils.mapper.createObjectNode()
+        val `object` = objectMapper.createObjectNode()
         for (ix in 0 until sequence.size()) {
             val context = sequence[ix]
 
             // must evaluate lets over again for each value because of context
             if (lets.isNotEmpty()) evalLets(scope!!, context, lets)
-            if (ifExpr == null || isTrue(ifExpr!!.apply(scope, context))) {
+            if (ifExpr == null || ifExpr!!.apply(scope, context).isTrue()) {
                 val valueNode = value.apply(scope, context)
                 if (filter.filter(valueNode)) {
                     // if there is no value, no need to evaluate the key

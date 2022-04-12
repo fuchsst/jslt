@@ -13,11 +13,11 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.schibsted.spt.data.jslt.impl.util.NodeUtils.indent
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
+import com.schibsted.spt.data.jslt.impl.util.indent
 
 /**
  * Represents a ("key" : expr) pair inside a JSON object.
@@ -48,7 +48,7 @@ class PairExpression(private var key: ExpressionNode, private var value: Express
         val expr: DotExpression = if (isKeyLiteral)
             DotExpression(staticKey, parent, location)
         else
-            FailDotExpression(location,"dynamic object")
+            FailDotExpression(location, "dynamic object")
         value.computeMatchContexts(expr)
     }
 
