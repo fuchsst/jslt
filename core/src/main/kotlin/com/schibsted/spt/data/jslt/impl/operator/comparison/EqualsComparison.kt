@@ -11,17 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.schibsted.spt.data.jslt.impl.operator
+package com.schibsted.spt.data.jslt.impl.operator.comparison
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
+import com.schibsted.spt.data.jslt.impl.operator.AbstractOperator
 import com.schibsted.spt.data.jslt.impl.util.toJsonNode
 
 class EqualsComparison(
-    left: ExpressionNode, right: ExpressionNode,
+    left: ExpressionNode,
+    right: ExpressionNode,
     location: Location?
-) : AbstractOperator(left, right, "==", location) {
+) : ComparisonOperator(left, right, "==", location) {
 
     override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = equals(v1, v2).toJsonNode()
 

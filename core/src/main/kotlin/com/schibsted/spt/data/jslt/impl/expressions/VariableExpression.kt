@@ -30,8 +30,8 @@ class VariableExpression(val variable: String, location: Location?) : AbstractNo
         println(indent(level) + this)
     }
 
-    override fun prepare(ctx: PreparationContext) {
-        val varInfo = ctx.scope.resolveVariable(this)
+    override fun prepare(context: PreparationContext) {
+        val varInfo = context.scope.resolveVariable(this)
         slot = varInfo.slot
         varInfo.incrementUsageCount()
         info = varInfo
@@ -41,7 +41,7 @@ class VariableExpression(val variable: String, location: Location?) : AbstractNo
         // if the variable is assigned to a literal then there's no point
         // in actually having a variable. we can just insert the literal
         // in the expression tree and be done with it.
-        val declaration = info!!.declaration
+        val declaration = info?.declaration
         // will be null if the variable is a parameter
         return if (declaration != null && declaration is LiteralExpression) declaration else this
     }

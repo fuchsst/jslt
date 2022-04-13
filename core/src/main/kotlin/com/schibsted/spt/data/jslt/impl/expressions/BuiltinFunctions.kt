@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.node.*
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.*
-import com.schibsted.spt.data.jslt.impl.operator.ComparisonOperator
-import com.schibsted.spt.data.jslt.impl.operator.EqualsComparison
+import com.schibsted.spt.data.jslt.impl.operator.comparison.EqualsComparison
+import com.schibsted.spt.data.jslt.impl.operator.comparison.compareTo
 import com.schibsted.spt.data.jslt.impl.util.*
 import com.schibsted.spt.data.jslt.impl.util.Utils.printHexBinary
 import java.io.UnsupportedEncodingException
@@ -88,11 +88,10 @@ object BuiltinFunctions {
     // ===== NUMBER
     class Number : AbstractFunction("number", 1, 2) {
         override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return if (arguments.size == 1) number(
-                arguments[0],
-                true,
-                null
-            ) else number(arguments[0], false, null, arguments[1])
+            return if (arguments.size == 1)
+                number(arguments[0], true, null)
+            else
+                number(arguments[0], false, null, arguments[1])
         }
     }
 
@@ -100,7 +99,10 @@ object BuiltinFunctions {
     class Round : AbstractFunction("round", 1, 1) {
         override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
             val number = arguments[0]
-            if (number.isNull) return NullNode.instance else if (!number.isNumber) throw JsltException("round() cannot round a non-number: $number")
+            if (number.isNull)
+                return NullNode.instance
+            else if (!number.isNumber)
+                throw JsltException("round() cannot round a non-number: $number")
             return LongNode(number.doubleValue().roundToLong())
         }
     }
@@ -109,7 +111,10 @@ object BuiltinFunctions {
     class Floor : AbstractFunction("floor", 1, 1) {
         override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
             val number = arguments[0]
-            if (number.isNull) return NullNode.instance else if (!number.isNumber) throw JsltException("floor() cannot round a non-number: $number")
+            if (number.isNull)
+                return NullNode.instance
+            else if (!number.isNumber)
+                throw JsltException("floor() cannot round a non-number: $number")
             return LongNode(floor(number.doubleValue()).toLong())
         }
     }
@@ -118,16 +123,18 @@ object BuiltinFunctions {
     class Ceiling : AbstractFunction("ceiling", 1, 1) {
         override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
             val number = arguments[0]
-            if (number.isNull) return NullNode.instance else if (!number.isNumber) throw JsltException("ceiling() cannot round a non-number: $number")
+            if (number.isNull)
+                return NullNode.instance
+            else if (!number.isNumber)
+                throw JsltException("ceiling() cannot round a non-number: $number")
             return LongNode(ceil(number.doubleValue()).toLong())
         }
     }
 
     // ===== RANDOM
     class Random : AbstractFunction("random", 0, 0) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return DoubleNode(random.nextDouble())
-        }
+        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode =
+            DoubleNode(random.nextDouble())
 
         companion object {
             private val random = java.util.Random()
@@ -138,7 +145,10 @@ object BuiltinFunctions {
     class Sum : AbstractFunction("sum", 1, 1) {
         override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
             val array = arguments[0]
-            if (array.isNull) return NullNode.instance else if (!array.isArray) throw JsltException("sum(): argument must be array, was $array")
+            if (array.isNull)
+                return NullNode.instance
+            else if (!array.isArray)
+                throw JsltException("sum(): argument must be array, was $array")
             var sum = 0.0
             var integral = true
             for (ix in 0 until array.size()) {
@@ -177,14 +187,17 @@ object BuiltinFunctions {
     class HashInt : AbstractFunction("hash-int", 1, 1) {
         override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
             val node = arguments[0]
-            return if (node.isNull) NullNode.instance else try {
-                // https://stackoverflow.com/a/18993481/90580
-                val obj = mapper.treeToValue(node, kotlin.Any::class.java)
-                val jsonString = writer.writeValueAsString(obj)
-                IntNode(jsonString.hashCode())
-            } catch (e: JsonProcessingException) {
-                throw JsltException("hash-int: can't process json$e")
-            }
+            return if (node.isNull)
+                NullNode.instance
+            else
+                try {
+                    // https://stackoverflow.com/a/18993481/90580
+                    val obj = mapper.treeToValue(node, kotlin.Any::class.java)
+                    val jsonString = writer.writeValueAsString(obj)
+                    IntNode(jsonString.hashCode())
+                } catch (e: JsonProcessingException) {
+                    throw JsltException("hash-int: can't process json$e")
+                }
         }
 
         companion object {
@@ -741,24 +754,20 @@ object BuiltinFunctions {
     class Min : AbstractFunction("min", 2, 2) {
         override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
             // this works because null is the smallest of all values
-            return if (ComparisonOperator.compare(
-                    arguments[0],
-                    arguments[1],
-                    null
-                ) < 0
-            ) arguments[0] else arguments[1]
+            return if (arguments[0] < arguments[1])
+                arguments[0] else arguments[1]
         }
     }
 
     // ===== MAX
     class Max : AbstractFunction("max", 2, 2) {
         override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return if (arguments[0].isNull || arguments[1].isNull) NullNode.instance else if (ComparisonOperator.compare(
-                    arguments[0],
-                    arguments[1],
-                    null
-                ) > 0
-            ) arguments[0] else arguments[1]
+            return if (arguments[0].isNull || arguments[1].isNull)
+                NullNode.instance
+            else if (arguments[0] > arguments[1])
+                arguments[0]
+            else
+                arguments[1]
         }
     }
 

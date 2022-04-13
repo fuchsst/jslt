@@ -11,17 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.schibsted.spt.data.jslt.impl.operator
+package com.schibsted.spt.data.jslt.impl.operator.numeric
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
-import com.schibsted.spt.data.jslt.impl.util.toJsonNode
 
-class UnequalsComparison(
+class MinusOperator(
     left: ExpressionNode, right: ExpressionNode,
     location: Location?
-) : AbstractOperator(left, right, "!=", location) {
+) : NumericOperator(left, right, "-", location) {
+    // we only support the numeric operation and nothing else
+    override fun perform(v1: Double, v2: Double): Double = v1 - v2
 
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = (!EqualsComparison.equals(v1, v2)).toJsonNode()
+    override fun perform(v1: Long, v2: Long): Long = v1 - v2
 }

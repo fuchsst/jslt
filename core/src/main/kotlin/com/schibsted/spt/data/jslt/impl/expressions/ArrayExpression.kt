@@ -20,15 +20,20 @@ import com.schibsted.spt.data.jslt.impl.util.indent
 import com.schibsted.spt.data.jslt.impl.util.objectMapper
 
 class ArrayExpression(private val children: Array<ExpressionNode>, location: Location?) : AbstractNode(location) {
+
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+        return apply(scope, input, children)
+    }
+
+    fun apply(scope: Scope?, input: JsonNode?, array: Array<ExpressionNode>): JsonNode {
         return objectMapper.createArrayNode().addAll(
-            children.map { it.apply(scope, input) }
+            array.map { it.apply(scope, input) }
         )
     }
 
     override fun computeMatchContexts(parent: DotExpression?) {
         val fail = FailDotExpression(location, "array")
-        for (ix in children.indices) children[ix].computeMatchContexts(fail)
+        children.forEach { it.computeMatchContexts(fail) }
     }
 
     override fun getChildren(): List<ExpressionNode> {
@@ -36,22 +41,21 @@ class ArrayExpression(private val children: Array<ExpressionNode>, location: Loc
     }
 
     override fun optimize(): ExpressionNode {
-        var allLiterals = true
-        for (ix in children.indices) {
-            children[ix] = children[ix].optimize()
-            allLiterals = allLiterals && children[ix] is LiteralExpression
-        }
-        if (!allLiterals) return this
+        val optimizedChildren = children.map { it.optimize() }.toTypedArray()
 
-        // we're a static array expression. we can just make the array and
-        // turn that into a literal, instead of creating it over and over
-        val array = apply(null, null) // literals won't use scope or input
-        return LiteralExpression(array, location)
+        return if (!optimizedChildren.all { it is LiteralExpression }) {
+            ArrayExpression(children = optimizedChildren, location = location)
+        } else {
+            // we're a static array expression. we can just make the array and
+            // turn that into a literal, instead of creating it over and over
+            val array = apply(null, null, optimizedChildren) // literals won't use scope or input
+            LiteralExpression(array, location)
+        }
     }
 
     override fun dump(level: Int) {
         println(indent(level) + '[')
-        for (ix in children.indices) children[ix].dump(level + 1)
+        children.forEach { it.dump(level + 1) }
         println(indent(level) + ']')
     }
 }

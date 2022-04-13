@@ -17,15 +17,16 @@ import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.PreparationContext
 import com.schibsted.spt.data.jslt.impl.util.indent
 
-abstract class AbstractNode(var location: Location?) : ExpressionNode {
+abstract class AbstractNode(open val location: Location?) : ExpressionNode {
+
     override fun dump(level: Int) {
         println(indent(level) + this)
     }
 
     override fun computeMatchContexts(parent: DotExpression?) {}
 
-    override fun prepare(ctx: PreparationContext) {
-        getChildren().forEach { it.prepare(ctx) }
+    override fun prepare(context: PreparationContext) {
+        getChildren().forEach { it.prepare(context) }
     }
 
     override fun optimize(): ExpressionNode = this

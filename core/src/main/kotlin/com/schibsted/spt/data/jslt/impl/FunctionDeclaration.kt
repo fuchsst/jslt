@@ -75,16 +75,25 @@ class FunctionDeclaration(
         body.computeMatchContexts(fail)
     }
 
-    override fun prepare(ctx: PreparationContext) {
-        ctx.scope.enterFunction()
-        for (ix in parameters.indices) parameterSlots[ix] = ctx.scope.registerParameter(parameters[ix], location)
+    override fun prepare(context: PreparationContext) {
+        context.scope.enterFunction()
+        for (ix in parameters.indices) parameterSlots[ix] = context.scope.registerParameter(parameters[ix], location)
         for (ix in lets.indices) {
-            lets[ix].register(ctx.scope)
-            lets[ix].prepare(ctx)
+            lets[ix].register(context.scope)
+            lets[ix].prepare(context)
         }
-        body.prepare(ctx)
-        stackFrameSize = ctx.scope.stackFrameSize
-        ctx.scope.leaveFunction()
+        body.prepare(context)
+        stackFrameSize = context.scope.stackFrameSize
+        context.scope.leaveFunction()
     }
+
+}
+
+fun Map<String, Function>.optimize(): Map<String, Function> {
+    val result =
+        mapValues {
+            if (it.value is FunctionDeclaration) (it.value as FunctionDeclaration).optimize() as Function else it.value
+    }
+    return result
 
 }

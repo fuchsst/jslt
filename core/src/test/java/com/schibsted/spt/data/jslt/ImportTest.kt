@@ -53,7 +53,7 @@ class ImportTest : TestBase() {
             "{}",
             "import \"uses-test.jstl\" as u " +
                     "u(.)",
-            "42", emptyMap(), setOf(TestFunction())
+            "42", emptyMap(), setOf(TestFunction()).toMutableSet()
         )
     }
 

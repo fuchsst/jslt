@@ -33,14 +33,15 @@ object FunctionUtils {
         val klass = Class.forName(className)
         val methods = klass.methods
         var method: Method? = null
-        for (ix in methods.indices) {
-            if (methods[ix].name == methodName) {
-                method =
-                    if (method == null) methods[ix] else throw JsltException("More than one method named '$methodName'")
+        methods.forEach {
+            if (it.name == methodName) {
+                method = if (method == null) it else throw JsltException("More than one method named '$methodName'")
             }
         }
-        if (method == null) throw JsltException("No such method: '$methodName'")
-        return FunctionWrapper(functionName, method)
+        if (method == null)
+            throw JsltException("No such method: '$methodName'")
+        else
+            return FunctionWrapper(functionName, method!!)
     }
 
     /**

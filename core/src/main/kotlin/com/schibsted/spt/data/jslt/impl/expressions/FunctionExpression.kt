@@ -22,7 +22,8 @@ import com.schibsted.spt.data.jslt.impl.*
 import com.schibsted.spt.data.jslt.impl.util.asString
 
 class FunctionExpression(
-    val functionName: String, arguments: Array<ExpressionNode>,
+    val functionName: String,
+    arguments: Array<ExpressionNode>,
     location: Location?
 ) : AbstractInvocationExpression(arguments, location) {
     private var function: Function? = null // null before resolution
@@ -47,7 +48,8 @@ class FunctionExpression(
     }
 
     override fun optimize(): ExpressionNode {
-        super.optimize()
+        val optimizeArrayContainsMin = 10
+        arguments = arguments.map { it.optimize() }.toTypedArray()
 
         // if the second argument to contains() is an array with a large
         // number of elements, don't do a linear search. instead, use an
@@ -56,7 +58,7 @@ class FunctionExpression(
             arguments[1] is LiteralExpression
         ) {
             val v = arguments[1].apply(null, null)
-            if (v.isArray && v.size() > OPTIMIZE_ARRAY_CONTAINS_MIN) {
+            if (v.isArray && v.size() > optimizeArrayContainsMin) {
                 // we use resolve to make sure all references are updated
                 resolve(OptimizedStaticContainsFunction(v))
             }
@@ -64,9 +66,9 @@ class FunctionExpression(
 
         // ensure compile-time evaluation of static regular expressions
         if (function is RegexpFunction) {
-            val ix = (function as RegexpFunction).regexpArgumentNumber()
-            if (arguments[ix] is LiteralExpression) {
-                val r = arguments[ix].apply(null, null).asString(JsltException("Regexp cannot be null"))
+            val index = (function as RegexpFunction).regexpArgumentNumber()
+            if (arguments[index] is LiteralExpression) {
+                val r = arguments[index].apply(null, null).asString(JsltException("Regexp cannot be null"))
 
                 // will fill in cache, and throw correct exception
                 BuiltinFunctions.getRegexp(r)
@@ -75,7 +77,8 @@ class FunctionExpression(
         return this
     }
 
-    companion object {
-        private const val OPTIMIZE_ARRAY_CONTAINS_MIN = 10
+    override fun toString(): String {
+        return super.toString()
     }
+
 }

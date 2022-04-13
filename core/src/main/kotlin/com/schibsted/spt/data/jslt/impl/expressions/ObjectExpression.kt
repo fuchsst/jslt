@@ -22,15 +22,15 @@ import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.OptimizerScope
 import com.schibsted.spt.data.jslt.impl.PreparationContext
 import com.schibsted.spt.data.jslt.impl.Scope
-import com.schibsted.spt.data.jslt.impl.util.objectMapper
 import com.schibsted.spt.data.jslt.impl.util.evalLets
 import com.schibsted.spt.data.jslt.impl.util.indent
+import com.schibsted.spt.data.jslt.impl.util.objectMapper
 
-class ObjectExpression(
+data class ObjectExpression(
     private val lets: Array<LetExpression>,
     private val children: Array<PairExpression>,
     private val matcher: MatcherExpression?,
-    location: Location?,
+    override var location: Location?,
     private val filter: JsonFilter
 ) : AbstractNode(location) {
     private var contextQuery: DotExpression? = null // find object to match
@@ -92,6 +92,24 @@ class ObjectExpression(
     }
 
     override fun optimize(): ExpressionNode {
+//        val optimizedLets = lets.map { it.optimize() as LetExpression }.toTypedArray()
+//        val optimizedMatcher = matcher?.optimize() as MatcherExpression?
+//        val optimizedChildren = children.map { it.optimize() as PairExpression }.toTypedArray()
+//        val allLiterals = (optimizedMatcher == null && children.all { it.isLiteral }) // not static otherwise
+//
+//        if (!allLiterals) return copy(
+//            lets = optimizedLets,
+//            children = optimizedChildren,
+//            matcher = optimizedMatcher,
+//            location = location,
+//            filter = filter
+//        )
+//
+//        // we're a static object expression. we can just make the object and
+//        // turn that into a literal, instead of creating it over and over
+//        // apply parameters: literals won't use scope or input, so...
+//        return LiteralExpression(apply(OptimizerScope(), NullNode.instance), location)
+
         for (ix in lets.indices) lets[ix].optimize()
         matcher?.optimize()
         var allLiterals = matcher == null // not static otherwise
@@ -108,11 +126,11 @@ class ObjectExpression(
         return LiteralExpression(`object`, location)
     }
 
-    override fun prepare(ctx: PreparationContext) {
-        ctx.scope.enterScope()
-        lets.forEach { it.register(ctx.scope) }
-        getChildren().forEach { it.prepare(ctx) }
-        ctx.scope.leaveScope()
+    override fun prepare(context: PreparationContext) {
+        context.scope.enterScope()
+        lets.forEach { it.register(context.scope) }
+        getChildren().forEach { it.prepare(context) }
+        context.scope.leaveScope()
     }
 
     override fun getChildren(): List<ExpressionNode> {

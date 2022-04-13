@@ -22,7 +22,7 @@ import com.schibsted.spt.data.jslt.impl.util.indent
 open class DotExpression(
     private var key: String? = null,
     private var parent: ExpressionNode? = null,
-    location: Location?
+    override var location: Location?
 ) : AbstractNode(location) {
 
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
@@ -57,8 +57,9 @@ open class DotExpression(
         if (parent != null) (parent as DotExpression).checkOk(matcher)
     }
 
-    override fun optimize(): ExpressionNode {
-        if (parent != null) parent = parent!!.optimize()
-        return this
-    }
+    override fun optimize(): ExpressionNode = DotExpression(
+        key = key,
+        parent = parent?.optimize(),
+        location=location
+    )
 }

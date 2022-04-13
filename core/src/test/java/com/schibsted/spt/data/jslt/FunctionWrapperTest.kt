@@ -13,12 +13,12 @@ class FunctionWrapperTest : TestBase() {
     @Test
     @Throws(Exception::class)
     fun testWrapStaticMethod() {
-        val functions: Collection<Function> = setOf(
+        val functions: MutableSet<Function> = setOf(
             wrapStaticMethod(
                 "url-decode",
                 "java.net.URLDecoder", "decode", arrayOf(String::class.java, String::class.java)
             )
-        )
+        ).toMutableSet()
         check(
             "{}", "url-decode(\"foo\", \"utf-8\")", "\"foo\"",
             emptyMap(),
@@ -43,12 +43,12 @@ class FunctionWrapperTest : TestBase() {
     @Test
     @Throws(Exception::class)
     fun testWrapStaticMethodLong() {
-        val functions: Collection<Function> = setOf(
+        val functions: MutableSet<Function> = setOf(
             wrapStaticMethod(
                 "time-millis",
                 "java.lang.System", "currentTimeMillis"
             )
-        )
+        ).toMutableSet()
         val query = "time-millis()"
         val before = System.currentTimeMillis()
         val context: JsonNode = mapper.readTree("{}")
@@ -63,12 +63,12 @@ class FunctionWrapperTest : TestBase() {
     @Test
     @Throws(Exception::class)
     fun testWrapStaticMethodNumeric() {
-        val functions: Collection<Function> = setOf(
+        val functions: MutableSet<Function> = setOf(
             wrapStaticMethod(
                 "pow",
                 "java.lang.Math", "pow"
             )
-        )
+        ).toMutableSet()
         val query = "pow(2, 10)"
         val context: JsonNode = mapper.readTree("{}")
         val expr = compileString(query, functions)

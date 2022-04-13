@@ -24,88 +24,94 @@ import com.schibsted.spt.data.jslt.impl.util.isTrue
 
 class IfExpression(
     private var test: ExpressionNode,
-    private val thenlets: Array<LetExpression>,
+    private val thenLets: Array<LetExpression>,
     private var then: ExpressionNode,
     // can be null
-    private val elselets: Array<LetExpression>?,
+    private val elseLets: Array<LetExpression>?,
     // can be null
-    private var orelse: ExpressionNode?,
+    private var orElse: ExpressionNode?,
     location: Location?
 ) : AbstractNode(location) {
 
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         if (test.apply(scope, input).isTrue()) {
-            evalLets(scope!!, input!!, thenlets)
+            evalLets(scope!!, input!!, thenLets)
             return then.apply(scope, input)
         }
 
         // test was false, so return null or else
-        return if (orelse != null) {
-            evalLets(scope!!, input!!, elselets)
-            orelse!!.apply(scope, input)
+        return if (orElse != null) {
+            evalLets(scope!!, input!!, elseLets)
+            orElse!!.apply(scope, input)
         } else NullNode.instance
     }
 
     override fun computeMatchContexts(parent: DotExpression?) {
-        for (ix in thenlets.indices) thenlets[ix].computeMatchContexts(parent)
+        for (ix in thenLets.indices) thenLets[ix].computeMatchContexts(parent)
         then.computeMatchContexts(parent)
-        if (orelse != null) {
-            orelse!!.computeMatchContexts(parent)
-            for (ix in elselets!!.indices) elselets[ix].computeMatchContexts(parent)
+        if (orElse != null) {
+            orElse!!.computeMatchContexts(parent)
+            for (ix in elseLets!!.indices) elseLets[ix].computeMatchContexts(parent)
         }
     }
 
     override fun optimize(): ExpressionNode {
-        for (ix in thenlets.indices) thenlets[ix].optimize()
-        if (elselets != null) {
-            for (ix in elselets.indices) elselets[ix].optimize()
-        }
+//        copy(
+//            test = test.optimize(),
+//            thenLets = thenLets.map { it.optimize() as LetExpression }.toTypedArray(),
+//            then = then.optimize(),
+//            elseLets = elseLets?.map { it.optimize() as LetExpression }?.toTypedArray(),
+//            orElse = orElse?.optimize()
+//        )
+
+        thenLets.forEach { it.optimize() }
+        elseLets?.forEach { it.optimize()            }
         test = test.optimize()
         then = then.optimize()
-        if (orelse != null) orelse = orelse!!.optimize()
+        if (orElse != null) orElse = orElse!!.optimize()
         return this
     }
 
-    override fun prepare(ctx: PreparationContext) {
-        test.prepare(ctx)
+    override fun prepare(context: PreparationContext) {
+        test.prepare(context)
 
         // then
-        ctx.scope.enterScope()
-        for (ix in thenlets.indices) {
-            thenlets[ix].prepare(ctx)
-            thenlets[ix].register(ctx.scope)
+        context.scope.enterScope()
+        for (ix in thenLets.indices) {
+            thenLets[ix].prepare(context)
+            thenLets[ix].register(context.scope)
         }
-        then.prepare(ctx)
-        ctx.scope.leaveScope()
+        then.prepare(context)
+        context.scope.leaveScope()
 
         // else
-        if (orelse != null) {
-            ctx.scope.enterScope()
-            for (ix in elselets!!.indices) {
-                elselets[ix].prepare(ctx)
-                elselets[ix].register(ctx.scope)
+        if (orElse != null) {
+            context.scope.enterScope()
+            for (ix in elseLets!!.indices) {
+                elseLets[ix].prepare(context)
+                elseLets[ix].register(context.scope)
             }
-            orelse!!.prepare(ctx)
-            ctx.scope.leaveScope()
+            orElse!!.prepare(context)
+            context.scope.leaveScope()
         }
     }
 
     override fun getChildren(): List<ExpressionNode> {
-        return listOf(test, *thenlets, then) +
-                (elselets?.toList() ?: emptyList()) +
-                listOfNotNull(orelse)
+        return listOf(test, *thenLets, then) +
+                (elseLets?.toList() ?: emptyList()) +
+                listOfNotNull(orElse)
     }
 
     override fun dump(level: Int) {
         println(indent(level) + "if (")
         test.dump(level + 1)
         println(indent(level) + ")")
-        thenlets.forEach { it.dump(level + 1) }
+        thenLets.forEach { it.dump(level + 1) }
         then.dump(level + 1)
-        if (orelse != null) {
+        if (orElse != null) {
             println(indent(level) + "else")
-            elselets!!.forEach { it.dump(level + 1) }
-            orelse!!.dump(level + 1)
+            elseLets!!.forEach { it.dump(level + 1) }
+            orElse!!.dump(level + 1)
         }
     }
 }

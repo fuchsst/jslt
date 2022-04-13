@@ -22,7 +22,11 @@ import com.schibsted.spt.data.jslt.impl.util.indent
 /**
  * Represents a ("key" : expr) pair inside a JSON object.
  */
-class PairExpression(private var key: ExpressionNode, private var value: ExpressionNode, location: Location?) :
+class PairExpression(
+    private var key: ExpressionNode,
+    private var value: ExpressionNode,
+    location: Location?
+) :
     AbstractNode(location) {
 
     fun applyKey(scope: Scope?, input: JsonNode?): String {
@@ -58,9 +62,11 @@ class PairExpression(private var key: ExpressionNode, private var value: Express
         get() = key is LiteralExpression
 
     override fun optimize(): ExpressionNode {
-        key = key.optimize()
-        value = value.optimize()
-        return this
+        return PairExpression(
+            key = key.optimize(),
+            value = value.optimize(),
+            location
+        )
     }
 
     override fun getChildren(): List<ExpressionNode> {

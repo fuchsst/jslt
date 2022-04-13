@@ -11,17 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.schibsted.spt.data.jslt.impl.operator
+package com.schibsted.spt.data.jslt.impl.operator.comparison
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.util.toJsonNode
 
-class SmallerComparison(
+class BiggerComparison(
     left: ExpressionNode, right: ExpressionNode,
     location: Location?
 ) : ComparisonOperator(left, right, ">", location) {
 
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = (compare(v1, v2, location) < 0).toJsonNode()
+    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = (v1 > v2).toJsonNode()
 }

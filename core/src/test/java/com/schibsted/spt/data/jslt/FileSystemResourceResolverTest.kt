@@ -62,9 +62,7 @@ class FileSystemResourceResolverTest {
 
     @Throws(IOException::class)
     private fun parse(resource: String, resolver: ResourceResolver): Expression {
-        return Parser(
-            FileReader(File(resource))
-        )
+        return Parser(reader=            FileReader(File(resource))        )
             .withResourceResolver(resolver)
             .compile()
     }

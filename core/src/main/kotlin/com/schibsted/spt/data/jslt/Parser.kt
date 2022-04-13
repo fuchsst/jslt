@@ -26,54 +26,39 @@ import java.io.*
 
 /**
  * Parses JSLT expressions to Expression objects for evaluating them.
+ * @param source A string used in error messages.
+ * @param functions Extension functions
+ * @param modules The keys in the map are the module "names", and importing these names will
+ *                bind a prefix to the modules in this map. The names can follow any syntax.
+ * @param objectFilter For all key/value pairs in objects being created, if this filter
+ *                     returns false when given the value, the key/value pair is omitted.
  */
-class Parser private constructor(
-    private val source: String, private val reader: Reader, // ===== FLUENT BUILDER API
-    private val functions: Collection<Function>,
-    private val resolver: ResourceResolver,
-    private val modules: MutableMap<String, Module>,
-    private val objectFilter: JsonFilter
+class Parser internal constructor(
+    private val source: String = "<unknown>",
+    private val reader: Reader, // ===== FLUENT BUILDER API
+    private val functions: MutableSet<Function> = mutableSetOf(),
+    private val resolver: ResourceResolver = ClasspathResourceResolver(),
+    private val modules: MutableMap<String, Module> = mutableMapOf(),
+    private val objectFilter: JsonFilter = DefaultJsonFilter()
 ) {
-    /**
-     * Create a Parser reading JSLT source from the given Reader. Uses a
-     * [ClasspathResourceResolver] for import statements.
-     */
-    constructor(reader: Reader) : this(
-        "<unknown>", reader, emptySet<Function>().toMutableSet(),
-        ClasspathResourceResolver(), emptyMap<String, Module>().toMutableMap(),
-        DefaultJsonFilter()
-    )
 
     /**
-     * Create a new Parser with the given source name. The name is a string
-     * used in error messages.
+     * Create a new Parser with the given source name. The name is a string used in error messages.
      */
-    fun withSource(thisSource: String): Parser {
-        return Parser(
-            thisSource, reader, functions, resolver, modules,
-            objectFilter
-        )
-    }
+    fun withSource(thisSource: String): Parser =
+        Parser(thisSource, reader, functions, resolver, modules, objectFilter)
 
     /**
      * Create a new Parser with the given extension functions.
      */
-    fun withFunctions(theseFunctions: Collection<Function>): Parser {
-        return Parser(
-            source, reader, theseFunctions, resolver, modules,
-            objectFilter
-        )
-    }
+    fun withFunctions(theseFunctions: MutableSet<Function>): Parser =
+        Parser(source, reader, theseFunctions, resolver, modules, objectFilter)
 
     /**
      * Create a new Parser with the given resource resolver.
      */
-    fun withResourceResolver(thisResolver: ResourceResolver): Parser {
-        return Parser(
-            source, reader, functions, thisResolver, modules,
-            objectFilter
-        )
-    }
+    fun withResourceResolver(thisResolver: ResourceResolver): Parser =
+        Parser(source, reader, functions, thisResolver, modules, objectFilter)
 
     /**
      * Create a new Parser with the given modules registered. The keys
@@ -96,10 +81,7 @@ class Parser private constructor(
      */
     fun withObjectFilter(filter: String?): Parser {
         val parsedFilter = compileString(filter)
-        return Parser(
-            source, reader, functions, resolver, modules,
-            JsltJsonFilter(parsedFilter)
-        )
+        return Parser(source, reader, functions, resolver, modules, JsltJsonFilter(parsedFilter))
     }
 
     /**
@@ -116,7 +98,10 @@ class Parser private constructor(
      */
     fun compile(): Expression {
         val context = ParseContext(
-            functions, source, resolver, modules,
+            functions,
+            source,
+            resolver,
+            modules,
             emptyList<JsltFile>().toMutableList(),
             PreparationContext(),
             objectFilter
@@ -129,20 +114,16 @@ class Parser private constructor(
          * Compile the given JSLT file with the given predefined functions.
          */
         @JvmOverloads
-        fun compile(jslt: File, functions: Collection<Function> = emptySet()): Expression {
+        fun compile(jslt: File, functions: MutableSet<Function> = emptySet<Function>().toMutableSet()): Expression =
             try {
                 FileReader(jslt).use { f ->
-                    return Parser(f)
-                        .withSource(jslt.absolutePath)
-                        .withFunctions(functions)
-                        .compile()
+                    return Parser(source = jslt.absolutePath, functions = functions, reader = f).compile()
                 }
             } catch (e: FileNotFoundException) {
                 throw JsltException("Couldn't find file $jslt")
             } catch (e: IOException) {
                 throw JsltException("Couldn't read file $jslt", e)
             }
-        }
 
         /**
          * Compile JSLT expression given as an inline string with the given
@@ -150,53 +131,32 @@ class Parser private constructor(
          */
         @JvmStatic
         @JvmOverloads
-        fun compileString(
-            jslt: String?,
-            functions: Collection<Function> = emptySet()
-        ): Expression {
-            return Parser(StringReader(jslt))
-                .withSource("<inline>")
-                .withFunctions(functions)
-                .compile()
-        }
+        fun compileString(jslt: String?, functions: MutableSet<Function> = emptySet<Function>().toMutableSet()): Expression =
+            Parser(source = "<inline>", functions = functions, reader = StringReader(jslt)).compile()
 
         /**
          * Load and compile JSLT expression from the classpath with the
          * given extension functions.
          */
         @JvmOverloads
-        fun compileResource(
-            jslt: String,
-            functions: Collection<Function> = emptySet()
-        ): Expression {
+        fun compileResource(jslt: String, functions: MutableSet<Function> = emptySet<Function>().toMutableSet()): Expression =
             try {
                 Parser::class.java.classLoader.getResourceAsStream(jslt).use { stream ->
                     if (stream == null) throw JsltException("Cannot load resource '$jslt': not found")
                     val reader: Reader = InputStreamReader(stream, "UTF-8")
-                    return Parser(reader)
-                        .withSource(jslt)
-                        .withFunctions(functions)
-                        .compile()
+                    return Parser(source = jslt, functions = functions, reader = reader).compile()
                 }
             } catch (e: IOException) {
                 throw JsltException("Couldn't read resource $jslt", e)
             }
-        }
 
         /**
-         * Compile JSLT expression from the Reader. The source is just a
-         * name used in error messages, and has no practical effect.
+         * Compile JSLT expression from the Reader.
+         * @param source The source is just a name used in error messages, and has no practical effect.
          */
+        @Suppress("unused")
         @JvmStatic
-        fun compile(
-            source: String,
-            reader: Reader,
-            functions: Collection<Function>
-        ): Expression {
-            return Parser(reader)
-                .withSource(source)
-                .withFunctions(functions)
-                .compile()
-        }
+        fun compile(source: String, reader: Reader, functions: MutableSet<Function>): Expression =
+            Parser(source = source, functions = functions, reader = reader).compile()
     }
 }

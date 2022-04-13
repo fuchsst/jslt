@@ -20,28 +20,29 @@ import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.*
 import com.schibsted.spt.data.jslt.impl.expressions.*
 import com.schibsted.spt.data.jslt.impl.operator.*
+import com.schibsted.spt.data.jslt.impl.operator.comparison.*
+import com.schibsted.spt.data.jslt.impl.operator.numeric.DivideOperator
+import com.schibsted.spt.data.jslt.impl.operator.numeric.MinusOperator
+import com.schibsted.spt.data.jslt.impl.operator.numeric.MultiplyOperator
+import com.schibsted.spt.data.jslt.impl.operator.numeric.PlusOperator
 import java.io.IOException
 
 
 fun ParseContext.compileExpression(parser: JsltParser): Expression {
     return try {
         parser.Start()
-        //((SimpleNode) parser.jjtree.rootNode()).dump("");
         val expr = compile(parser.jjtree.rootNode() as SimpleNode)
         expr.setGlobalModules(this.files)
         expr
     } catch (e: ParseException) {
-        throw JsltException(
-            "Parse error: " + e.message,
-            makeLocation(e.currentToken)
-        )
+        throw JsltException("Parse error: " + e.message, makeLocation(e.currentToken))
     } catch (e: TokenMgrError) {
         throw JsltException("Parse error: " + e.message)
     }
 }
 
 private fun compileImport(
-    functions: Collection<Function>,
+    functions: MutableSet<Function>,
     parent: ParseContext,
     jslt: String
 ): ExpressionImpl {
@@ -68,10 +69,7 @@ private fun ParseContext.compileModule(parser: JsltParser): ExpressionImpl = try
     parser.Module()
     compile(parser.jjtree.rootNode() as SimpleNode)
 } catch (e: ParseException) {
-    throw JsltException(
-        "Parse error: " + e.message,
-        this.makeLocation(e.currentToken)
-    )
+    throw JsltException("Parse error: " + e.message, this.makeLocation(e.currentToken))
 } catch (e: TokenMgrError) {
     throw JsltException("Parse error: " + e.message)
 }
@@ -85,8 +83,7 @@ private fun ParseContext.compile(root: SimpleNode): ExpressionImpl {
     resolveFunctions()
     val impl = ExpressionImpl(lets, this.declaredFunctions, top)
     impl.prepare(this.preparationContext)
-    impl.optimize()
-    return impl
+    return impl.optimize()
 }
 
 private fun ParseContext.node2expr(node: SimpleNode?): ExpressionNode {
@@ -101,11 +98,10 @@ private fun ParseContext.node2expr(node: SimpleNode?): ExpressionNode {
         val loc = makeLocation(node)
         val child2 = node.getChild(1 + ix * 2)
         val comp = child2.jjtGetFirstToken()
-        root = if (comp.kind == JsltParserConstants.PIPE) PipeOperator(
-            root,
-            next,
-            loc
-        ) else throw JsltException("INTERNAL ERROR: What kind of operator is this?")
+        root = if (comp.kind == JsltParserConstants.PIPE)
+            PipeOperator(root, next, loc)
+        else
+            throw JsltException("INTERNAL ERROR: What kind of operator is this?")
         ix += 1
     }
     return root
@@ -117,11 +113,7 @@ private fun ParseContext.node2OrExpr(node: SimpleNode): ExpressionNode {
     if (node.jjtGetNumChildren() == 1) // it's just the base
         return first
     val second = node2OrExpr(node.getChild(1))
-    return OrOperator(
-        first,
-        second,
-        makeLocation(node)
-    )
+    return OrOperator(first, second, makeLocation(node))
 }
 
 private fun ParseContext.node2AndExpr(node: SimpleNode): ExpressionNode {
@@ -224,21 +216,21 @@ private fun ParseContext.node2BaseExpr(node: SimpleNode): ExpressionNode {
             localNode.getFirstChild()
         )
         JsltParserConstants.IF -> {
-            var letelse: Array<LetExpression> = emptyArray()
-            var theelse: ExpressionNode? = null
-            val maybeelse = localNode.getLastChild()
-            if (maybeelse!!.jjtGetFirstToken().kind == JsltParserConstants.ELSE) {
-                val elseexpr = maybeelse.getLastChild()
-                theelse = node2expr(elseexpr)
-                letelse = buildLets(maybeelse)
+            var letElse: Array<LetExpression> = emptyArray()
+            var theElse: ExpressionNode? = null
+            val maybeElse = localNode.getLastChild()
+            if (maybeElse!!.jjtGetFirstToken().kind == JsltParserConstants.ELSE) {
+                val elseExpr = maybeElse.getLastChild()
+                theElse = node2expr(elseExpr)
+                letElse = buildLets(maybeElse)
             }
-            val thenelse = buildLets(localNode)
+            val thenElse = buildLets(localNode)
             IfExpression(
                 node2expr(localNode.getFirstChild()),
-                thenelse,
-                node2expr(localNode.getChild(thenelse.size + 1)),
-                letelse,
-                theelse,
+                thenElse,
+                node2expr(localNode.getChild(thenElse.size + 1)),
+                letElse,
+                theElse,
                 loc
             )
         }
@@ -298,15 +290,15 @@ private fun ParseContext.chainable2Expr(node: SimpleNode): ExpressionNode {
         val fnode = node.descendTo(JsltParserTreeConstants.JJTFUNCTIONCALL)
 
         // imported function must already be there and cannot be a macro
-        val pident = token.image
-        val colon = pident.indexOf(':') // grammar ensures it's there
-        val prefix = pident.substring(0, colon)
-        val name = pident.substring(colon + 1)
+        val pIdent = token.image
+        val colon = pIdent.indexOf(':') // grammar ensures it's there
+        val prefix = pIdent.substring(0, colon)
+        val name = pIdent.substring(colon + 1)
 
         // throws exception if something fails
         val c = getImportedCallable(prefix, name, loc)
         start = if (c is Function) {
-            FunctionExpression(pident, children2Exprs(fnode), loc).apply { resolve(c) }
+            FunctionExpression(pIdent, children2Exprs(fnode), loc).apply { resolve(c) }
         } else
             MacroExpression((c as Macro), children2Exprs(fnode), loc)
     } else if (kind == JsltParserConstants.DOT) {
@@ -325,10 +317,7 @@ private fun ParseContext.chainable2Expr(node: SimpleNode): ExpressionNode {
         start
 }
 
-private fun ParseContext.buildDotChain(
-    chainLink: SimpleNode?,
-    parent: ExpressionNode
-): ExpressionNode {
+private fun ParseContext.buildDotChain(chainLink: SimpleNode?, parent: ExpressionNode): ExpressionNode {
     if (chainLink!!.id != JsltParserTreeConstants.JJTCHAINLINK) throw JsltException("INTERNAL ERROR: Wrong type of node: $chainLink")
     var dot = buildChainLink(chainLink, parent)
 
@@ -337,10 +326,7 @@ private fun ParseContext.buildDotChain(
     return dot
 }
 
-private fun ParseContext.buildChainLink(
-    node: SimpleNode?,
-    parent: ExpressionNode?
-): ExpressionNode {
+private fun ParseContext.buildChainLink(node: SimpleNode?, parent: ExpressionNode?): ExpressionNode {
     var token = node!!.jjtGetFirstToken()
     return if (token.kind == JsltParserConstants.DOT) {
         // it's a dotkey
@@ -353,10 +339,7 @@ private fun ParseContext.buildChainLink(
         buildArraySlicer(node.getFirstChild(), parent)
 }
 
-private fun ParseContext.buildArraySlicer(
-    node: SimpleNode,
-    parent: ExpressionNode?
-): ExpressionNode {
+private fun ParseContext.buildArraySlicer(node: SimpleNode, parent: ExpressionNode?): ExpressionNode {
     var colon = false // slicer or index?
     val first = node.getFirstChild()
     val last = node.getLastChild()
@@ -391,10 +374,11 @@ private fun ParseContext.buildForExpression(node: SimpleNode): ForExpression {
     )
 }
 
-private fun ParseContext.identOrString(token: Token): String = if (token.kind == JsltParserConstants.STRING)
-    makeString(token)
-else
-    token.image
+private fun ParseContext.identOrString(token: Token): String =
+    if (token.kind == JsltParserConstants.STRING)
+        makeString(token)
+    else
+        token.image
 
 private fun ParseContext.makeString(literal: Token): String {
     // we need to handle escape sequences, so therefore we walk

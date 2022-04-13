@@ -27,7 +27,7 @@ open class TestBase {
     fun check(
         input: String?, query: String?, result: String?,
         variables: Map<String, JsonNode> = emptyMap(),
-        functions: Collection<Function> = emptySet()
+        functions: MutableSet<Function> = emptySet<Function>().toMutableSet()
     ) {
         try {
             val context = mapper.readTree(input)

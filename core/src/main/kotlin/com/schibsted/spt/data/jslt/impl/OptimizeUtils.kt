@@ -17,20 +17,5 @@ import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
 import com.schibsted.spt.data.jslt.impl.expressions.LiteralExpression
 
 object OptimizeUtils {
-    /**
-     * Removes let expressions for variables that are simply assigned to
-     * literals, because VariableExpression will inline those literals
-     * and remove itself, so there's no need to evaluate the variable.
-     */
-    fun optimizeLets(lets: Array<LetExpression>): Array<LetExpression> {
-        var count = 0
-        lets.forEach {
-            it.optimize()
-            if (it.declaration !is LiteralExpression) count++
-        }
-        if (count == lets.size) return lets
 
-        val filtered = lets.filterNot { it.declaration is LiteralExpression }.toTypedArray()
-        return filtered
-    }
 }

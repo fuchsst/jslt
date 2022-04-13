@@ -30,7 +30,7 @@ class JsltException @JvmOverloads constructor(
      * Returns the error message with location information.
      */
     override val message: String
-        get() = if (location != null) super.message + " at " + location else super.message!!
+        get() = if (location != null) "${super.message}  at $location" else super.message!!
 
     /**
      * Returns the error message without location information.

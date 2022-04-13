@@ -49,7 +49,7 @@ fun Boolean.toJsonNode(): JsonNode = if (this) BooleanNode.TRUE else BooleanNode
 
 fun Double.toJsonNode(): JsonNode = DoubleNode(this)
 
-fun toJsonNode(array:Array<String?>): JsonNode {
+fun toJsonNode(array: Array<String?>): JsonNode {
     val elements = array.map { if (it == null) NullNode.instance else TextNode(it) }
     return objectMapper.createArrayNode().addAll(elements)
 }
@@ -76,7 +76,7 @@ fun toArray(value: JsonNode, nullok: Boolean): ArrayNode? {
     throw JsltException("Cannot convert $value to array")
 }
 
-fun number(value: JsonNode, loc: Location?): JsonNode {
+fun number(value: JsonNode, loc: Location?=null): JsonNode {
     return number(value, false, loc)
 }
 

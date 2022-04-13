@@ -43,15 +43,34 @@ class LetExpression(val variable: String, var declaration: ExpressionNode, locat
         return listOf(declaration)
     }
 
-    override fun optimize(): ExpressionNode {
-        declaration = declaration.optimize()
-        return this
-    }
+    override fun optimize(): ExpressionNode = LetExpression(
+        variable = variable,
+        declaration = declaration.optimize(),
+        location = location
+    )
 
     fun register(scope: ScopeManager) {
         val varInfo = scope.registerVariable(this)
         info = varInfo
         slot = varInfo.slot
     }
+}
 
+
+/**
+ * Removes let expressions for variables that are simply assigned to
+ * literals, because VariableExpression will inline those literals
+ * and remove itself, so there's no need to evaluate the variable.
+ */
+fun Array<LetExpression>.optimize(): Array<LetExpression> {
+    // return this.map { it.optimize() as LetExpression }.filterNot { it.declaration is LiteralExpression }.toTypedArray()
+
+    var count = 0
+    forEach {
+        it.optimize()
+        if (it.declaration !is LiteralExpression) count++
+    }
+    if (count == size) return this
+
+    return filterNot { it.declaration is LiteralExpression }.toTypedArray()
 }

@@ -23,7 +23,7 @@ import com.schibsted.spt.data.jslt.impl.util.indent
  * having to repeat so much code.
  */
 abstract class AbstractInvocationExpression(
-    @JvmField protected var arguments: Array<ExpressionNode>,
+    protected var arguments: Array<ExpressionNode>,
     location: Location?
 ) : AbstractNode(location) {
     private var callable: Callable? = null // null until resolve is called
@@ -49,9 +49,7 @@ abstract class AbstractInvocationExpression(
     }
 
     override fun optimize(): ExpressionNode {
-        arguments.indices.forEach { ix ->
-            arguments[ix] = arguments[ix].optimize()
-        }
+        arguments = arguments.map { it.optimize() }.toTypedArray()
         return this
     }
 

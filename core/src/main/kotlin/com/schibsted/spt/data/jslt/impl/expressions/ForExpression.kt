@@ -55,6 +55,13 @@ class ForExpression(
     }
 
     override fun optimize(): ExpressionNode {
+//        return ForExpression(
+//            valueExpr = valueExpr.optimize(),
+//            lets = lets.map { it.optimize() as LetExpression }.toTypedArray(),
+//            loopExpr = loopExpr.optimize(),
+//            ifExpr = ifExpr?.optimize(),
+//            location = location
+//        )
         lets.forEach { it.optimize() }
         valueExpr = valueExpr.optimize()
         loopExpr = loopExpr.optimize()
@@ -62,11 +69,11 @@ class ForExpression(
         return this
     }
 
-    override fun prepare(ctx: PreparationContext) {
-        ctx.scope.enterScope()
-        lets.forEach { it.register(ctx.scope) }
-        getChildren().forEach { it.prepare(ctx) }
-        ctx.scope.leaveScope()
+    override fun prepare(context: PreparationContext) {
+        context.scope.enterScope()
+        lets.forEach { it.register(context.scope) }
+        getChildren().forEach { it.prepare(context) }
+        context.scope.leaveScope()
     }
 
     override fun getChildren(): List<ExpressionNode> {

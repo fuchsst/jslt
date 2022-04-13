@@ -24,7 +24,8 @@ import com.schibsted.spt.data.jslt.impl.expressions.FunctionExpression
  * parser/compiler settings, and so on, during parsing.
  */
 class ParseContext(
-    val extensions: Collection<Function>, source: String,
+    val extensions: MutableSet<Function>,
+    source: String,
     resolver: ResourceResolver,
     namedModules: MutableMap<String, Module>,
     files: MutableList<JsltFile>,

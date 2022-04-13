@@ -59,22 +59,22 @@ class StaticTests : TestBase() {
 
     @Test
     fun testJavaExtensionFunction() {
-        check("{}", "test()", "42", emptyMap(), setOf(TestFunction()))
+        check("{}", "test()", "42", emptyMap(), setOf(TestFunction()).toMutableSet())
     }
 
     @Test
     fun testJavaExtensionFunctionNull() {
-        check("{}", "test()", "null", emptyMap(), setOf(TestNullFunction()))
+        check("{}", "test()", "null", emptyMap(), setOf(TestNullFunction()).toMutableSet())
     }
 
     @Test
     fun testJavaExtensionFunctionNullInExpression() {
-        check("{}", "test() or 42", "true", emptyMap(), setOf(TestNullFunction()))
+        check("{}", "test() or 42", "true", emptyMap(), setOf(TestNullFunction()).toMutableSet())
     }
 
     @Test
     fun testJavaExtensionFunctionNullInExpression2() {
-        check("{}", "lowercase(test())", "null", emptyMap(), setOf(TestNullFunction()))
+        check("{}", "lowercase(test())", "null", emptyMap(), setOf(TestNullFunction()).toMutableSet())
     }
 
     @Test
@@ -142,8 +142,7 @@ class StaticTests : TestBase() {
             return buf.toString()
         } else {
             // generate simple expression
-            val kind = (Math.random() * 4).toInt()
-            when (kind) {
+            when ((Math.random() * 4).toInt()) {
                 0 -> return "[A-Za-z0-9]+"
                 1 -> return makeRandomString(10)
                 2 -> return "\\d+"
@@ -167,7 +166,7 @@ class StaticTests : TestBase() {
         val jslt = StringReader(
             "import \"the test module\" as t t:test()"
         )
-        val expr = Parser(jslt)
+        val expr = Parser(reader =  jslt)
             .withNamedModules(modules)
             .compile()
         val result = expr.apply(null)
@@ -182,7 +181,7 @@ class StaticTests : TestBase() {
         val jslt = StringReader(
             "{ \"foo\" : null, \"bar\" : \"\" }"
         )
-        val expr = Parser(jslt)
+        val expr = Parser(reader = jslt)
             .withObjectFilter(filter)
             .compile()
         val desired = mapper.readTree(
@@ -200,7 +199,7 @@ class StaticTests : TestBase() {
         val jslt = StringReader(
             "{ \"foo\" : null, \"bar\" : \"\" }"
         )
-        val expr = Parser(jslt)
+        val expr = Parser(reader = jslt)
             .withObjectFilter(filter)
             .compile()
         val desired = mapper.readTree(
@@ -218,7 +217,7 @@ class StaticTests : TestBase() {
         val jslt = StringReader(
             "{for (.) .key : .value }"
         )
-        val expr = Parser(jslt)
+        val expr = Parser(reader = jslt)
             .withObjectFilter(filter)
             .compile()
         val input = mapper.readTree(
@@ -237,7 +236,7 @@ class StaticTests : TestBase() {
         val jslt = StringReader(
             "{for (.) .key : .value }"
         )
-        val expr = Parser(jslt)
+        val expr = Parser(reader = jslt)
             .withObjectFilter(TrueJsonFilter())
             .compile()
         val input = mapper.readTree(
@@ -271,9 +270,7 @@ class StaticTests : TestBase() {
     @Test
     fun testClasspathResolverCharEncoding() {
         val r = ClasspathResourceResolver(StandardCharsets.ISO_8859_1)
-        val expr = Parser(r.resolve("character-encoding-master.jslt"))
-            .withResourceResolver(r)
-            .compile()
+        val expr = Parser(reader = r.resolve("character-encoding-master.jslt"), resolver = r).compile()
         val result = expr.apply(NullNode.instance)
         Assert.assertEquals("Hei på deg", result.asText())
     }

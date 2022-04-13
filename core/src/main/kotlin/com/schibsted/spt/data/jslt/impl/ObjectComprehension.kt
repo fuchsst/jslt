@@ -62,11 +62,11 @@ class ObjectComprehension(
         return `object`
     }
 
-    override fun prepare(ctx: PreparationContext) {
-        ctx.scope.enterScope()
-        for (ix in lets.indices) lets[ix].register(ctx.scope)
-        for (child in getChildren()) child.prepare(ctx)
-        ctx.scope.leaveScope()
+    override fun prepare(context: PreparationContext) {
+        context.scope.enterScope()
+        for (ix in lets.indices) lets[ix].register(context.scope)
+        for (child in getChildren()) child.prepare(context)
+        context.scope.leaveScope()
     }
 
     override fun getChildren(): List<ExpressionNode> {

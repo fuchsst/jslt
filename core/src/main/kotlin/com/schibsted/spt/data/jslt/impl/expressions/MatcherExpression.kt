@@ -21,7 +21,8 @@ import com.schibsted.spt.data.jslt.impl.Scope
  * Represents the '* - ... : .'
  */
 class MatcherExpression(
-    private var expr: ExpressionNode, val minuses: List<String>,
+    private var expr: ExpressionNode,
+    val minuses: List<String>,
     location: Location?
 ) : AbstractNode(location) {
 
@@ -39,8 +40,10 @@ class MatcherExpression(
 
     override fun dump(level: Int) {}
 
-    override fun optimize(): ExpressionNode {
-        expr = expr.optimize()
-        return this
-    }
+    override fun optimize(): ExpressionNode =
+        MatcherExpression(
+            expr = expr.optimize(),
+            minuses=minuses,
+            location = location
+        )
 }

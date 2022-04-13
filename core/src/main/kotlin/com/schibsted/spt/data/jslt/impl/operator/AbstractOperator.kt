@@ -26,9 +26,12 @@ import com.schibsted.spt.data.jslt.impl.util.indent
  * Shared abstract superclass for comparison operators and others.
  */
 abstract class AbstractOperator(
-    var left: ExpressionNode, var right: ExpressionNode,
-    val operator: String, location: Location?
+    var left: ExpressionNode,
+    var right: ExpressionNode,
+    val operator: String,
+    location: Location?
 ) : AbstractNode(location) {
+
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         val v1 = left.apply(scope, input)
         val v2 = right.apply(scope, input)
@@ -47,10 +50,10 @@ abstract class AbstractOperator(
 
         // if the two operands are literals we can just evaluate the
         // result right now and be done with it
-        return if (left is LiteralExpression && right is LiteralExpression) LiteralExpression(
-            apply(null, null),
-            location
-        ) else this
+        return if (left is LiteralExpression && right is LiteralExpression)
+            LiteralExpression(apply(null, null), location)
+        else
+            this
     }
 
     override fun computeMatchContexts(parent: DotExpression?) {
@@ -64,6 +67,7 @@ abstract class AbstractOperator(
     }
 
     abstract fun perform(v1: JsonNode, v2: JsonNode): JsonNode
+
     override fun toString(): String {
         val first = if (left is AbstractOperator) "($left)" else left.toString()
         val second = if (right is AbstractOperator) "($right)" else right.toString()

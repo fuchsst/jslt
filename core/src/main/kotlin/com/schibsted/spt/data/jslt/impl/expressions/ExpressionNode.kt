@@ -32,7 +32,7 @@ interface ExpressionNode {
 
     // fills in the contextQuery in ObjectExpression matchers
     fun computeMatchContexts(parent: DotExpression?)
-    fun prepare(ctx: PreparationContext)
+    fun prepare(context: PreparationContext)
 
     // return self, or optimized version
     fun optimize(): ExpressionNode

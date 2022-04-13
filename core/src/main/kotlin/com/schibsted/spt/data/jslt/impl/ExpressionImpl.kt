@@ -21,6 +21,7 @@ import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.impl.expressions.DotExpression
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
+import com.schibsted.spt.data.jslt.impl.expressions.optimize
 import com.schibsted.spt.data.jslt.impl.util.evalLets
 
 /**
@@ -40,13 +41,9 @@ class ExpressionImpl(
     // parameters into the scope when evaluating the query
     private var parameterSlots: Map<String, Int> = emptyMap()
 
-    fun getFunction(name: String): Function {
-        return functions[name] ?: throw JsltException("Function '$name' not found!")
-    }
+    fun getFunction(name: String): Function = functions[name] ?: throw JsltException("Function '$name' not found!")
 
-    fun hasBody(): Boolean {
-        return actual != null
-    }
+    fun hasBody(): Boolean = actual != null
 
     override fun apply(variables: Map<String, JsonNode>, input: JsonNode?): JsonNode {
         val scope = Scope.makeScope(variables, stackFrameSize, parameterSlots)
@@ -93,13 +90,14 @@ class ExpressionImpl(
         evalLets(scope!!, input, lets)
     }
 
-    fun optimize() {
-        lets = OptimizeUtils.optimizeLets(lets)
+    fun optimize(): ExpressionImpl {
+        lets = lets.optimize()
         functions.values
             .asSequence()
             .filterIsInstance<FunctionDeclaration>()
             .forEach { it.optimize() }
         if (actual != null) actual = actual!!.optimize()
+        return this
     }
 
     private val children: List<ExpressionNode>

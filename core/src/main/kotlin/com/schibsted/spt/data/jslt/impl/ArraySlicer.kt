@@ -25,39 +25,40 @@ import com.schibsted.spt.data.jslt.impl.util.objectMapper
 /**
  * Indexing and slicing of arrays and also strings.
  */
-class ArraySlicer(// can be null
-    private var left: ExpressionNode?,
+data class ArraySlicer(// can be null
+    private val left: ExpressionNode?,
     private val colon: Boolean, // can be null
-    private var right: ExpressionNode?,
-    private var parent: ExpressionNode?,
-    location: Location?
+    private val right: ExpressionNode?,
+    private val parent: ExpressionNode?,
+    override var location: Location?
 ) : AbstractNode(location) {
+
     override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
         val sequence = parent!!.apply(scope, input)
         if (!sequence.isArray && !sequence.isTextual) return NullNode.instance
         var size = sequence.size()
         if (sequence.isTextual) size = sequence.asText().length
-        val leftix = resolveIndex(scope!!, left, input!!, size, 0)
+        val leftIndex = resolveIndex(scope!!, left, input!!, size, 0)
         if (!colon) {
             return if (sequence.isArray) {
-                var `val` = sequence[leftix]
+                var `val` = sequence[leftIndex]
                 if (`val` == null) `val` = NullNode.instance
                 `val`
             } else {
                 val string = sequence.asText()
-                if (leftix >= string.length) throw JsltException("String index out of range: $leftix", location)
-                TextNode("" + string[leftix])
+                if (leftIndex >= string.length) throw JsltException("String index out of range: $leftIndex", location)
+                TextNode("" + string[leftIndex])
             }
         }
-        var rightix = resolveIndex(scope, right, input, size, size)
-        if (rightix > size) rightix = size
+        var rightIndex = resolveIndex(scope, right, input, size, size)
+        if (rightIndex > size) rightIndex = size
         return if (sequence.isArray) {
             val result = objectMapper.createArrayNode()
-            for (ix in leftix until rightix) result.add(sequence[ix])
+            for (ix in leftIndex until rightIndex) result.add(sequence[ix])
             result
         } else {
             val string = sequence.asText()
-            TextNode(string.substring(leftix, rightix))
+            TextNode(string.substring(leftIndex, rightIndex))
         }
     }
 
@@ -77,15 +78,14 @@ class ArraySlicer(// can be null
         return listOf(parent!!) + listOfNotNull(left) + listOfNotNull(right)
     }
 
-    override fun optimize(): ExpressionNode {
-        if (left != null) left = left!!.optimize()
-        if (right != null) right = right!!.optimize()
-        parent = parent!!.optimize()
-        return this
-    }
+    override fun optimize(): ExpressionNode = copy(
+        left = left?.optimize(),
+        right = right?.optimize(),
+        parent = parent?.optimize()
+    )
 
     override fun dump(level: Int) {
-        if (parent != null) parent!!.dump(level)
+        parent?.dump(level)
         println(indent(level) + this)
     }
 
