@@ -7,8 +7,8 @@ import java.text.ParseException
 
 class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
     companion object {
-        // we can safely do byte comparison, as UTF-8 always marks every non-ascii char 
-        // with a set bit in every sub-byte of the encoded character
+        // we can safely do byte comparison on those characters, as UTF-8 always marks every non-ascii char
+        // with the highest bit set in every sub-byte of the encoded character
         const val arrayStartChar = '['.code.toByte()
         const val arrayEndChar = ']'.code.toByte()
         const val objectStartChar = '{'.code.toByte()
@@ -41,7 +41,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         const val digit9 = '9'.code.toByte()
         const val exponentIdentifierLowerChar = 'e'.code.toByte()
         const val exponentIdentifierUpperChar = 'E'.code.toByte()
-        val numberChars = setOf<Byte>(
+        val numberChars = setOf(
             dot,
             minus,
             plus,
@@ -290,9 +290,6 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         }
         while (index < size) {
             val key = expectObjectKey()
-            if (key in items) {
-                throw ParseException("Found duplicate key in Json object at ${getPositionString()}.", index)
-            }
             expectColon()
             val value = parseAnyNode()
             items[key] = value
@@ -359,10 +356,8 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             } else if (bytes[index] == comma) {
                 index++
             } else {
-                throw ParseException("Invalid character at ${getPositionString()}. Expected '${
-                    comma.toInt().toChar()
-                }' or '$endChar' but found ${bytes[index].toInt().toChar()}.",
-                    index)
+                throw ParseException("Invalid character at ${getPositionString()}. Expected ',' or " +
+                        "'${endChar.toInt().toChar()}' but found ${getCurrentChar()}.", index)
             }
         }
         return false

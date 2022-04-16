@@ -167,7 +167,6 @@ class Json2StructConverterTest {
 
     @Test
     fun testStripCommentInArray() {
-        //val given = "[true, /* comment 1 */ false, /* comment 2 */ /*comment3*/ null, // line comment\n true -- linecomment2 /* comment 4 */\n, false /* comment5 */ -- line comment\n]"
         val given =
             "[true, /* comment 1 */ false, /* comment 2 */ /*comment3*/ null, // line comment\n" +
                     " true // linecomment2 /* comment 4 */\n" +

@@ -12,6 +12,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":core-struct"))
     testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
 }
 
 tasks.test {
