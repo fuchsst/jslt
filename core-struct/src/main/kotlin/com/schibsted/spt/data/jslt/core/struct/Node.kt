@@ -34,7 +34,7 @@ sealed class Node {
         override val isNumeric: Boolean = true
 
         companion object {
-            fun fromString(str: String): Node.Number {
+            fun fromString(str: String): Number {
                 val hasDecimalPoint = str.contains('.')
                 return if (!hasDecimalPoint) {
                     val int = str.toIntOrNull()

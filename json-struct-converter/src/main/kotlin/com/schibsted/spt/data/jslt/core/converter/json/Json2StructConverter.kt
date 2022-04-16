@@ -3,8 +3,6 @@ package com.schibsted.spt.data.jslt.core.converter.json
 import com.schibsted.spt.data.jslt.core.struct.*
 import java.io.EOFException
 import java.io.InputStream
-import java.math.BigDecimal
-import java.math.BigInteger
 import java.text.ParseException
 
 class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
@@ -84,10 +82,10 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         index = 0
         line = 0
         column = 0
-        return if (size==0) {
+        return if (size == 0) {
             NullNode()
         } else {
-             parseAnyNode()
+            parseAnyNode()
         }
     }
 
@@ -209,7 +207,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         if (index <= size - lenFalse && (bytes[index] == falseUpperFirstChar || bytes[index] == falseLowerFirstChar)) {
             val subStr = bytes.copyOfRange(index, index + lenFalse).decodeToString()
             if (subStr.lowercase() == "false") {
-                index+=lenFalse
+                index += lenFalse
                 return BooleanNode(false)
             } else {
                 throw ParseException("Invalid character at ${getPositionString()}. Expected false but found ${subStr}.",
@@ -218,7 +216,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         } else if (index <= size - lenTrue && (bytes[index] == trueUpperFirstChar || bytes[index] == trueLowerFirstChar)) {
             val subStr = bytes.copyOfRange(index, index + lenTrue).decodeToString()
             if (subStr.lowercase() == "true") {
-                index+=lenTrue
+                index += lenTrue
                 return BooleanNode(true)
             } else {
                 throw ParseException("Invalid character at ${getPositionString()}. Expected true but found ${subStr}.",
@@ -235,7 +233,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         if (index <= size - lenNull && (bytes[index] == nullUpperFirstChar || bytes[index] == nullLowerFirstChar)) {
             val subStr = bytes.copyOfRange(index, index + lenNull).decodeToString()
             if (subStr.lowercase() == "null") {
-                index+=lenNull
+                index += lenNull
                 return NullNode()
             } else {
                 throw ParseException("Invalid character at ${getPositionString()}. Expected null but found ${subStr}.",
@@ -357,7 +355,9 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             } else if (bytes[index] == comma) {
                 index++
             } else {
-                throw ParseException("Invalid character at ${getPositionString()}. Expected '${comma.toInt().toChar()}' or '$endChar' but found ${bytes[index].toInt().toChar()}.",
+                throw ParseException("Invalid character at ${getPositionString()}. Expected '${
+                    comma.toInt().toChar()
+                }' or '$endChar' but found ${bytes[index].toInt().toChar()}.",
                     index)
             }
         }
