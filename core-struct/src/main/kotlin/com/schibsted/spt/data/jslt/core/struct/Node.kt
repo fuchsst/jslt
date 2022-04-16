@@ -71,7 +71,7 @@ data class ObjectNode(val values: Map<String, Node>) : Node.Complex() {
     override val isNotEmpty: Boolean = values.isNotEmpty()
     override val isObject: Boolean = true
     override fun toString(): String =
-        values.map { (key, value) -> "$key : $value" }.joinToString(separator = ", ", prefix = "{ ", postfix = " }")
+        values.map { (key, value) -> "\"$key\" : $value" }.joinToString(separator = ", ", prefix = "{ ", postfix = " }")
 }
 
 data class ArrayNode(val values: List<Node>) : Node.Complex() {
@@ -84,7 +84,7 @@ data class ArrayNode(val values: List<Node>) : Node.Complex() {
 
 data class TextNode(val value: String) : Node.Primitive() {
     override val isTextual: Boolean = true
-    override fun toString(): String = value
+    override fun toString(): String = "\"value\""
 }
 
 

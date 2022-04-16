@@ -119,6 +119,34 @@ class Json2StructConverterTest {
         assertEquals(expected, actual)
     }
 
+
+    @Test
+    fun testParseObjectWithEveryDatatype() {
+        val given = "{" +
+                " 'key1': true,\n" +
+                " \"key2\": false,\n" +
+                " \"key3\": null,\n" +
+                " \"key4\": 12345,\n" +
+                " \"key5\": -1.1,\n" +
+                " \"key6\": \"some string\",\n" +
+                " \"key7\": { \"sub key\" : \"sub value\"},\n" +
+                " \"key8\": [null, 1,2,3]\n" +
+                "}"
+        val expected = ObjectNode(mapOf(
+            "key1" to BooleanNode(true),
+            "key2" to BooleanNode(false),
+            "key3" to NullNode(),
+            "key4" to IntNode(12345),
+            "key5" to DecimalNode(-1.1),
+            "key6" to TextNode("some string"),
+            "key7" to ObjectNode(mapOf("sub key" to TextNode("sub value"))),
+            "key8" to ArrayNode(listOf(NullNode(), IntNode(1), IntNode(2), IntNode(3))),
+        ))
+        val actual = Json2StructConverter(given).asStruct()
+
+        assertEquals(expected, actual)
+    }
+
     @Test
     fun testParseEmptyArray() {
         val given = "[]"
@@ -132,6 +160,21 @@ class Json2StructConverterTest {
     fun testParseBooleanArray() {
         val given = "[true, false, null]"
         val expected = ArrayNode(listOf(BooleanNode(true), BooleanNode(false), NullNode()))
+        val actual = Json2StructConverter(given).asStruct()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testStripCommentInArray() {
+        //val given = "[true, /* comment 1 */ false, /* comment 2 */ /*comment3*/ null, // line comment\n true -- linecomment2 /* comment 4 */\n, false /* comment5 */ -- line comment\n]"
+        val given =
+            "[true, /* comment 1 */ false, /* comment 2 */ /*comment3*/ null, // line comment\n" +
+                    " true // linecomment2 /* comment 4 */\n" +
+                    ", false /* comment5 */ // line comment\n" +
+                    "]"
+        val expected =
+            ArrayNode(listOf(BooleanNode(true), BooleanNode(false), NullNode(), BooleanNode(true), BooleanNode(false)))
         val actual = Json2StructConverter(given).asStruct()
 
         assertEquals(expected, actual)

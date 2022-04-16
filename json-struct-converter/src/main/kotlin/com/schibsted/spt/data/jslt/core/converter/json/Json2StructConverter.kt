@@ -7,6 +7,8 @@ import java.text.ParseException
 
 class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
     companion object {
+        // we can safely do byte comparison, as UTF-8 always marks every non-ascii char 
+        // with a set bit in every sub-byte of the encoded character
         const val arrayStartChar = '['.code.toByte()
         const val arrayEndChar = ']'.code.toByte()
         const val objectStartChar = '{'.code.toByte()
@@ -68,20 +70,21 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             field = value
             column++
         }
-    private var line = 0
-    private var column = 0
+    private var line = 1
+    private var column = 1
     private val size = bytes.size
 
     constructor(inputStream: InputStream) : this(inputStream.readBytes())
     constructor(string: String) : this(string.toByteArray())
 
     private fun getPositionString(): String = "index $index (line $line, column $column)"
+    private fun getCurrentChar(): Char = bytes[index].toInt().toChar()
 
 
     override fun asStruct(): Node {
         index = 0
-        line = 0
-        column = 0
+        line = 1
+        column = 1
         return if (size == 0) {
             NullNode()
         } else {
@@ -103,7 +106,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
                 falseUpperFirstChar, falseLowerFirstChar, trueUpperFirstChar, trueLowerFirstChar ->
                     parseBoolean()
                 nullUpperFirstChar, nullLowerFirstChar -> parseNull()
-                else -> throw ParseException("Invalid character ${bytes[index]} at ${getPositionString()}. Expected Array, Object, String, Number, true, false or null.",
+                else -> throw ParseException("Invalid character ${getCurrentChar()} at ${getPositionString()}. Expected Array, Object, String, Number, true, false or null.",
                     index)
             }
         } else {
@@ -127,7 +130,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
                     if (bytes[index] == newlineChar) {
                         line++
                         index++
-                        column = 0
+                        column = 1
                     } else {
                         index++
                     }
@@ -146,6 +149,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
                 }
                 index++ // skip the last char, as it is the terminal newline char
             } else if (bytes[index] == multilineCommentSecondStartChar) {
+                index++
                 while (index < size - 1 && bytes[index] != multilineCommentSecondStartChar && bytes[index + 1] != commentStartChar) {
                     index++
                 }
@@ -154,7 +158,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
                 }
                 index += 2 // as we did not exceeded the input, it means the char at "index" is "*" and at index+1 it is "/". skip those two chars
             } else {
-                throw ParseException("Invalid character ${bytes[index]} at ${getPositionString()}. Expected '//' or '/*'.",
+                throw ParseException("Invalid character ${getCurrentChar()} at ${getPositionString()}. Expected '//' or '/*'.",
                     index)
             }
         } else {
@@ -191,7 +195,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
                     exponentIdentifierIndex = index
                 }
             } else if ((bytes[index] == minus || bytes[index] == plus) && exponentIdentifierIndex != index - 1) {
-                throw ParseException("Invalid character ${bytes[index]} at ${getPositionString()}.", index)
+                throw ParseException("Invalid character ${getCurrentChar()} at ${getPositionString()}.", index)
             }
             index++
         }
@@ -294,7 +298,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             items[key] = value
             if (expectObjectEnd()) return ObjectNode(items)
         }
-        throw ParseException("Invalid character at ${getPositionString()}. Expected '$comma' or '$objectEndChar' but found ${bytes[index]}.",
+        throw ParseException("Invalid character at ${getPositionString()}. Expected ',' or '}' but found ${getCurrentChar()}.",
             index)
     }
 
@@ -305,7 +309,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         } else if (bytes[index] == singleQuoteStringStartChar) {
             parseSingleQuotedString()
         } else {
-            throw ParseException("Invalid character at ${getPositionString()}. Expected string but found ${bytes[index]}.",
+            throw ParseException("Invalid character at ${getPositionString()}. Expected string but found ${getCurrentChar()}.",
                 index)
         }
     } else {
@@ -318,7 +322,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             if (bytes[index] == colon) {
                 index++
             } else {
-                throw ParseException("Invalid character at ${getPositionString()}. Expected '$colon' but found ${bytes[index]}.",
+                throw ParseException("Invalid character at ${getPositionString()}. Expected ':' but found ${getCurrentChar()}.",
                     index)
             }
         } else {
@@ -340,7 +344,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             items.add(value)
             if (expectArrayEnd()) return ArrayNode(items)
         }
-        throw ParseException("Invalid character at ${getPositionString()}. Expected '$comma' or '$arrayEndChar' but found ${bytes[index]}.",
+        throw ParseException("Invalid character at ${getPositionString()}. Expected ',' or ']' but found ${getCurrentChar()}.",
             index)
     }
 
