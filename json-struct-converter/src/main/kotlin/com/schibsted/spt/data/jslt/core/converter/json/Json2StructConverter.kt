@@ -107,7 +107,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
 
     private fun skipBOM() {
         if (index <= 2 && size >= 2) {
-            if (bytes[0].toInt() == 0xEF && bytes[0].toInt() == 0xBB && bytes[0].toInt() == 0xBF) {
+            if (bytes[0] == (0xEF).toByte() && bytes[1] == (0xBB).toByte() && bytes[2] == (0xBF).toByte()) {
                 index += 3
             }
         }
