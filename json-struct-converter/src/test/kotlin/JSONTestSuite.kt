@@ -31,6 +31,7 @@ class JSONTestSuite {
             .toFile()
             .walk()
             .filter { it.isFile && it.extension == "json" }
+            .sorted()
             .map { Arguments.of(it.nameWithoutExtension, it.inputStream()) }
             .toList()
 
@@ -39,6 +40,7 @@ class JSONTestSuite {
             .toFile()
             .walk()
             .filter { it.isFile && it.extension == "json" }
+            .sorted()
             .map { Arguments.of(it.nameWithoutExtension, it.inputStream()) }
             .toList()
     }

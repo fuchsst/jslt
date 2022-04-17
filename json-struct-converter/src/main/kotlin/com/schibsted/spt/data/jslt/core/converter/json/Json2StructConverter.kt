@@ -75,6 +75,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         index = 0
         line = 1
         column = 1
+        skipBOM()
         val result = parseAnyNode()
         skipWhitespaces()
         if (index < size) {
@@ -101,6 +102,14 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             }
         } else {
             throw EOFException("Reached end of input but expected any of Array, Object, String, Number, true, false or null.")
+        }
+    }
+
+    private fun skipBOM() {
+        if (index <= 2 && size >= 2) {
+            if (bytes[0].toInt() == 0xEF && bytes[0].toInt() == 0xBB && bytes[0].toInt() == 0xBF) {
+                index += 3
+            }
         }
     }
 
