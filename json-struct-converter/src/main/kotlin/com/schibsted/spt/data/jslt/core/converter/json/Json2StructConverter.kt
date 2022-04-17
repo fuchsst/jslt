@@ -132,8 +132,6 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
           INTEGER: ("-")? ("0" | ["1"-"9"] (["0"-"9"])*)
           DECIMAL: ("-")? ("0" | ["1"-"9"] (["0"-"9"])*) ("." (["0"-"9"])+ | ("." (["0"-"9"])+)? ("e"|"E") ("+"|"-")? (["0"-"9"])+)
          */
-        var decimalPointIndex = -1
-
         val sign = if (bytes[index] == minus) "-" else ""
         if (sign.isNotEmpty()) {
             index++
