@@ -13,10 +13,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         const val arrayEndChar = ']'.code.toByte()
         const val objectStartChar = '{'.code.toByte()
         const val objectEndChar = '}'.code.toByte()
-        const val commentStartChar = '/'.code.toByte()
-        const val multilineCommentSecondStartChar = '*'.code.toByte()
-        const val doubleQuoteStringStartChar = '"'.code.toByte()
-        const val singleQuoteStringStartChar = '\''.code.toByte()
+        const val stringQuoteChar = '"'.code.toByte()
         const val escapeChar = '\\'.code.toByte()
         const val spaceChar = ' '.code.toByte()
         const val newlineChar = '\n'.code.toByte()
@@ -41,12 +38,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         const val digit9 = '9'.code.toByte()
         const val exponentIdentifierLowerChar = 'e'.code.toByte()
         const val exponentIdentifierUpperChar = 'E'.code.toByte()
-        val numberChars = setOf(
-            dot,
-            minus,
-            plus,
-            exponentIdentifierLowerChar,
-            exponentIdentifierUpperChar,
+        val digits = setOf(
             digit0,
             digit1,
             digit2,
@@ -57,10 +49,8 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             digit7,
             digit8,
             digit9)
-        const val falseUpperFirstChar = 'F'.code.toByte()
-        const val falseLowerFirstChar = 'f'.code.toByte()
-        const val trueUpperFirstChar = 'T'.code.toByte()
-        const val trueLowerFirstChar = 't'.code.toByte()
+        const val falseFirstChar = 'f'.code.toByte()
+        const val trueFirstChar = 't'.code.toByte()
         const val nullUpperFirstChar = 'N'.code.toByte()
         const val nullLowerFirstChar = 'n'.code.toByte()
     }
@@ -85,26 +75,26 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         index = 0
         line = 1
         column = 1
-        return if (size == 0) {
-            NullNode()
-        } else {
-            parseAnyNode()
+        val result = parseAnyNode()
+        skipWhitespaces()
+        if (index < size) {
+            throw ParseException("Input contains trailing characters that are not part of the Json parsed Json after ${getPositionString()}.",
+                index)
         }
+        return result
     }
 
     private fun parseAnyNode(): Node {
-        skipWhitespacesAndComments()
+        skipWhitespaces()
 
         if (index < size) {
             return when (bytes[index]) {
                 arrayStartChar -> parseArray()
                 objectStartChar -> parseObject()
-                doubleQuoteStringStartChar -> TextNode(parseDoubleQuotedString())
-                singleQuoteStringStartChar -> TextNode(parseSingleQuotedString())
+                stringQuoteChar -> TextNode(parseString())
                 minus, dot, digit0, digit1, digit2, digit3, digit4, digit5, digit6, digit7, digit8, digit9 ->
                     parseNumber()
-                falseUpperFirstChar, falseLowerFirstChar, trueUpperFirstChar, trueLowerFirstChar ->
-                    parseBoolean()
+                falseFirstChar, trueFirstChar -> parseBoolean()
                 nullUpperFirstChar, nullLowerFirstChar -> parseNull()
                 else -> throw ParseException("Invalid character ${getCurrentChar()} at ${getPositionString()}. Expected Array, Object, String, Number, true, false or null.",
                     index)
@@ -114,10 +104,9 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         }
     }
 
-    private fun skipWhitespacesAndComments() {
+    private fun skipWhitespaces() {
         while (index < size &&
-            (bytes[index] == commentStartChar ||
-                    bytes[index] == spaceChar ||
+            (bytes[index] == spaceChar ||
                     bytes[index] == newlineChar ||
                     bytes[index] == tabChar ||
                     bytes[index] == backspaceChar ||
@@ -125,7 +114,6 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
                     bytes[index] == carriageReturnChar)
         ) {
             when (bytes[index]) {
-                commentStartChar -> skipComment()
                 spaceChar, newlineChar, tabChar, backspaceChar, feedChar, carriageReturnChar -> {
                     if (bytes[index] == newlineChar) {
                         line++
@@ -139,87 +127,89 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         }
     }
 
-    private fun skipComment() {
-        if (index < size - 1) {
-            index++
-            if (bytes[index] == commentStartChar) {
-                index++
-                while (index < size && bytes[index] != newlineChar) {
-                    index++
-                }
-                index++ // skip the last char, as it is the terminal newline char
-            } else if (bytes[index] == multilineCommentSecondStartChar) {
-                index++
-                while (index < size - 1 && bytes[index] != multilineCommentSecondStartChar && bytes[index + 1] != commentStartChar) {
-                    index++
-                }
-                if (index >= size - 1) {
-                    throw EOFException("Unexpected EOF. Expected '*/' at ${getPositionString()} but input is too short.")
-                }
-                index += 2 // as we did not exceeded the input, it means the char at "index" is "*" and at index+1 it is "/". skip those two chars
-            } else {
-                throw ParseException("Invalid character ${getCurrentChar()} at ${getPositionString()}. Expected '//' or '/*'.",
-                    index)
-            }
-        } else {
-            throw EOFException("Unexpected EOF. Expected '//' or '/*' at ${getPositionString()} but input is too short.")
-        }
-    }
-
     private fun parseNumber(): Node.Number {
         /*
           INTEGER: ("-")? ("0" | ["1"-"9"] (["0"-"9"])*)
           DECIMAL: ("-")? ("0" | ["1"-"9"] (["0"-"9"])*) ("." (["0"-"9"])+ | ("." (["0"-"9"])+)? ("e"|"E") ("+"|"-")? (["0"-"9"])+)
          */
         var decimalPointIndex = -1
-        var exponentIdentifierIndex = -1
-        val hasSign = bytes[index] == minus
-        val startIndex = index
-        if (hasSign) index++ // skip potential minus at the beginning, so we don't recognize it and falsely throw an error because the exponent before is missing
-        while (index < size && bytes[index] in numberChars) {
-            if (bytes[index] == dot) {
-                if (decimalPointIndex >= 0) {
-                    throw ParseException("Invalid character at ${getPositionString()}. Two decimal points found in number.",
-                        index)
-                } else {
-                    decimalPointIndex = index
-                }
-            } else if (bytes[index] == exponentIdentifierLowerChar || bytes[index] == exponentIdentifierUpperChar) {
-                if (decimalPointIndex < 0 || index - decimalPointIndex <= 1) { // if we either have no decimal point (index <0) or the decimal point is right before the exponent, something is wrong
-                    throw ParseException("Invalid character at ${getPositionString()}. Found exponent but no preceding decimal point.",
-                        index)
-                } else if (exponentIdentifierIndex > 0) {
-                    throw ParseException("Invalid character at ${getPositionString()}. Two exponents found in number.",
-                        index)
-                } else {
-                    exponentIdentifierIndex = index
-                }
-            } else if ((bytes[index] == minus || bytes[index] == plus) && exponentIdentifierIndex != index - 1) {
-                throw ParseException("Invalid character ${getCurrentChar()} at ${getPositionString()}.", index)
-            }
+
+        val sign = if (bytes[index] == minus) "-" else ""
+        if (sign.isNotEmpty()) {
             index++
         }
-
-        val numberAsString = bytes.copyOfRange(startIndex, index).decodeToString()
-        return Node.Number.fromString(numberAsString)
+        val intStartIndex = index
+        while (index < size && bytes[index] in digits) {
+            index++
+        }
+        val intAsString = bytes.copyOfRange(intStartIndex, index).decodeToString()
+        if (intAsString.length > 1 && intAsString.startsWith('0')) {
+            throw ParseException("Invalid character at ${getPositionString()}. Integer values should not start with 0.",
+                index)
+        }
+        if (index == size || bytes[index] != dot) {
+            return Node.Number.Integral.fromString("$sign$intAsString")
+        } else {
+            if (index < size && bytes[index] == dot) {
+                if (intAsString.isEmpty()) {
+                    throw ParseException("Invalid character at ${getPositionString()}. " +
+                            "Real number without integer part.", index)
+                }
+                index++
+                if (index < size && bytes[index] !in digits) {
+                    throw ParseException("Invalid character at ${getPositionString()}. " +
+                            "Expected digit after decimal point.", index)
+                }
+                val decimalsStartIndex = index
+                while (index < size && bytes[index] in digits) {
+                    index++
+                }
+                val decimalsAsString = bytes.copyOfRange(decimalsStartIndex, index).decodeToString()
+                if (decimalsAsString.isEmpty()) {
+                    throw ParseException("Invalid character at ${getPositionString()}. " +
+                            "Number with decimal dot but without decimal part.", index)
+                }
+                if (index == size || (bytes[index] != exponentIdentifierLowerChar && bytes[index] != exponentIdentifierUpperChar)) {
+                    return Node.Number.Decimal.fromString("$sign$intAsString.$decimalsAsString")
+                } else {
+                    if (index < size && (bytes[index] == exponentIdentifierLowerChar || bytes[index] == exponentIdentifierUpperChar)) {
+                        index++
+                        if (index < size && (bytes[index] !in digits && bytes[index] != minus && bytes[index] != plus)) {
+                            throw ParseException("Invalid character at ${getPositionString()}. Expected digit after exponent.",
+                                index)
+                        }
+                        val exponentStartIndex = index
+                        if (index < size && (bytes[index] == minus || bytes[index] == plus)) {
+                            index++
+                        }
+                        while (index < size && bytes[index] in digits) {
+                            index++
+                        }
+                        val exponentAsString = bytes.copyOfRange(exponentStartIndex, index).decodeToString()
+                        return Node.Number.Decimal.fromString("$sign$intAsString.$decimalsAsString", exponentAsString)
+                    }
+                }
+            }
+        }
+        throw ParseException("Unexpected parser state at ${getPositionString()}.", index)
     }
 
     private fun parseBoolean(): BooleanNode {
         val lenFalse = 5 // False
         val lenTrue = 4 // True
 
-        if (index <= size - lenFalse && (bytes[index] == falseUpperFirstChar || bytes[index] == falseLowerFirstChar)) {
+        if (index <= size - lenFalse && bytes[index] == falseFirstChar) {
             val subStr = bytes.copyOfRange(index, index + lenFalse).decodeToString()
-            if (subStr.lowercase() == "false") {
+            if (subStr == "false") {
                 index += lenFalse
                 return BooleanNode(false)
             } else {
                 throw ParseException("Invalid character at ${getPositionString()}. Expected false but found ${subStr}.",
                     index)
             }
-        } else if (index <= size - lenTrue && (bytes[index] == trueUpperFirstChar || bytes[index] == trueLowerFirstChar)) {
+        } else if (index <= size - lenTrue && bytes[index] == trueFirstChar) {
             val subStr = bytes.copyOfRange(index, index + lenTrue).decodeToString()
-            if (subStr.lowercase() == "true") {
+            if (subStr == "true") {
                 index += lenTrue
                 return BooleanNode(true)
             } else {
@@ -248,15 +238,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         }
     }
 
-    private fun parseSingleQuotedString(): String {
-        return parseString(singleQuoteStringStartChar)
-    }
-
-    private fun parseDoubleQuotedString(): String {
-        return parseString(doubleQuoteStringStartChar)
-    }
-
-    private fun parseString(stringStartEndChar: Byte): String {
+    private fun parseString(): String {
         var lastWasEscapeChar = false
         val startIndex = index + 1 // skip first one, as this is the string enclosing character " or '
         while (index < size) {
@@ -266,19 +248,28 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             } else if (bytes[index] == newlineChar) {
                 throw ParseException("Invalid character at ${getPositionString()}. Linebreaks are not allowed in strings.",
                     index)
-            } else if (bytes[index] == stringStartEndChar && !lastWasEscapeChar) {
+            } else if (bytes[index] == stringQuoteChar && !lastWasEscapeChar) {
                 val endIndex = index // note: indexTo parameter of copyOfRange is exclusive
                 index++ // skip closing " or '
-                return if (startIndex < endIndex - 1) {
+                return if (startIndex < endIndex) {
                     bytes.copyOfRange(startIndex, endIndex).decodeToString()
                 } else {
                     ""
                 }
             } else {
+                if (lastWasEscapeChar && bytes[index].toInt().toChar() !in listOf('n', 't', 'r', '"', '\\')
+                ) {
+                    throw ParseException("Invalid escaped character '${getCurrentChar()}' at ${getPositionString()}.",
+                        index)
+                }
+                if (!lastWasEscapeChar && bytes[index].toInt() < 32) {
+                    throw ParseException("Unescaped control character '${getCurrentChar()}' at ${getPositionString()}.",
+                        index)
+                }
                 lastWasEscapeChar = false
             }
         }
-        throw EOFException("Unexpected EOF. Expected string closing character ($stringStartEndChar) for string at ${getPositionString()} but input is too short.")
+        throw EOFException("Unexpected EOF. Expected string closing character (\") for string at ${getPositionString()} but input is too short.")
     }
 
     private fun parseObject(): ObjectNode {
@@ -286,6 +277,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         val items = mutableMapOf<String, Node>()
         // handle empty object
         if (bytes[index] == objectEndChar) {
+            index++
             return ObjectNode(items)
         }
         while (index < size) {
@@ -294,19 +286,18 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
             val value = parseAnyNode()
             items[key] = value
             if (expectObjectEnd()) return ObjectNode(items)
+            expectComma()
         }
         throw ParseException("Invalid character at ${getPositionString()}. Expected ',' or '}' but found ${getCurrentChar()}.",
             index)
     }
 
     private fun expectObjectKey() = if (index < size) {
-        skipWhitespacesAndComments()
-        if (bytes[index] == doubleQuoteStringStartChar) {
-            parseDoubleQuotedString()
-        } else if (bytes[index] == singleQuoteStringStartChar) {
-            parseSingleQuotedString()
+        skipWhitespaces()
+        if (bytes[index] == stringQuoteChar) {
+            parseString()
         } else {
-            throw ParseException("Invalid character at ${getPositionString()}. Expected string but found ${getCurrentChar()}.",
+            throw ParseException("Invalid character at ${getPositionString()}. Expected string but found '${getCurrentChar()}'.",
                 index)
         }
     } else {
@@ -314,7 +305,7 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
     }
 
     private fun expectColon() {
-        skipWhitespacesAndComments()
+        skipWhitespaces()
         if (index < size) {
             if (bytes[index] == colon) {
                 index++
@@ -334,12 +325,14 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
         val items = mutableListOf<Node>()
         // handle empty array
         if (bytes[index] == arrayEndChar) {
+            index++
             return ArrayNode(items)
         }
         while (index < size) {
             val value = parseAnyNode()
             items.add(value)
             if (expectArrayEnd()) return ArrayNode(items)
+            expectComma()
         }
         throw ParseException("Invalid character at ${getPositionString()}. Expected ',' or ']' but found ${getCurrentChar()}.",
             index)
@@ -347,17 +340,26 @@ class Json2StructConverter(private val bytes: ByteArray) : StructConverter {
 
     private fun expectArrayEnd(): Boolean = expectEnd(arrayEndChar)
 
-    private fun expectEnd(endChar: Byte): Boolean {
-        skipWhitespacesAndComments()
+    private fun expectComma() {
+        skipWhitespaces()
         if (index < size) {
-            if (bytes[index] == endChar) {
-                index++
-                return true
-            } else if (bytes[index] == comma) {
+            if (bytes[index] == comma) {
                 index++
             } else {
-                throw ParseException("Invalid character at ${getPositionString()}. Expected ',' or " +
-                        "'${endChar.toInt().toChar()}' but found ${getCurrentChar()}.", index)
+                throw ParseException("Invalid character at ${getPositionString()}. Expected ',' but found ${getCurrentChar()}.",
+                    index)
+            }
+        }
+    }
+
+    private fun expectEnd(endChar: Byte): Boolean {
+        skipWhitespaces()
+        if (index < size) {
+            return if (bytes[index] == endChar) {
+                index++
+                true
+            } else {
+                false
             }
         }
         return false

@@ -2,6 +2,7 @@ package com.schibsted.spt.data.jslt.core.struct
 
 import java.math.BigDecimal
 import java.math.BigInteger
+import kotlin.math.pow
 
 sealed class Node {
     open val isObject: Boolean = false
@@ -58,6 +59,51 @@ sealed class Node {
                 }
             }
         }
+
+        sealed class Integral : Number() {
+            override val isIntegral: Boolean = true
+
+            companion object {
+                fun fromString(str: String): Number {
+                    val int = str.toIntOrNull()
+                    return if (int != null) {
+                        IntNode(int)
+                    } else {
+                        val long = str.toLongOrNull()
+                        if (long != null) {
+                            LongNode(long)
+                        } else {
+                            BigIntNode(BigInteger(str))
+                        }
+                    }
+                }
+            }
+        }
+
+        sealed class Decimal : Number() {
+            override val isDecimal: Boolean = true
+
+            companion object {
+                fun fromString(decimal: String, exponent: String? = null): Number {
+                    return if (exponent == null) {
+                        val double = decimal.toDoubleOrNull()
+                        if (double != null) {
+                            DecimalNode(double)
+                        } else {
+                            BigDecimalNode(BigDecimal(decimal))
+                        }
+                    } else {
+                        val decimalAsDouble = decimal.toDouble()
+                        val exponentAsInt = exponent.toInt()
+                        if (exponentAsInt > -308 && exponentAsInt < 308) {
+                            DecimalNode(decimalAsDouble * 10.0.pow(exponent.toDouble()))
+                        } else {
+                            BigDecimalNode(BigDecimal(decimal) * BigDecimal(10).pow(exponentAsInt))
+                        }
+                    }
+                }
+            }
+        }
     }
 
     sealed class Constant : Primitive() {
@@ -84,31 +130,28 @@ data class ArrayNode(val values: List<Node>) : Node.Complex() {
 
 data class TextNode(val value: String) : Node.Primitive() {
     override val isTextual: Boolean = true
-    override fun toString(): String = "\"value\""
+    override fun toString(): String = "\"$value\""
 }
 
 
-data class IntNode(val value: Int) : Node.Number() {
-    override val isIntegral: Boolean = true
+data class IntNode(val value: Int) : Node.Number.Integral() {
     override fun toString(): String = value.toString()
 }
 
-data class LongNode(val value: Long) : Node.Number() {
-    override val isIntegral: Boolean = true
+data class LongNode(val value: Long) : Node.Number.Integral() {
     override fun toString(): String = value.toString()
 }
 
-data class BigIntNode(val value: BigInteger) : Node.Number() {
-    override val isIntegral: Boolean = true
+data class BigIntNode(val value: BigInteger) : Node.Number.Integral() {
     override fun toString(): String = value.toString()
 }
 
-data class DecimalNode(val value: Double) : Node.Number() {
+data class DecimalNode(val value: Double) : Node.Number.Decimal() {
     override val isDecimal: Boolean = true
     override fun toString(): String = value.toString()
 }
 
-data class BigDecimalNode(val value: BigDecimal) : Node.Number() {
+data class BigDecimalNode(val value: BigDecimal) : Node.Number.Decimal() {
     override val isDecimal: Boolean = true
     override fun toString(): String = value.toString()
 }

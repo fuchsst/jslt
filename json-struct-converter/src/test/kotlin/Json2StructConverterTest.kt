@@ -1,19 +1,19 @@
 import com.schibsted.spt.data.jslt.core.converter.json.Json2StructConverter
 import com.schibsted.spt.data.jslt.core.struct.*
-
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.io.EOFException
 import java.math.BigInteger
 
 class Json2StructConverterTest {
 
     @Test
     fun testParseEmpty() {
-        val given = ""
-        val expected = NullNode()
-        val actual = Json2StructConverter(given).asStruct()
-
-        assertEquals(expected, actual)
+        val given = "  \n"
+        assertThrows<EOFException>("Expected to fail on empty input, but no exception was thrown!") {
+            Json2StructConverter(given).asStruct()
+        }
     }
 
     @Test
@@ -27,7 +27,7 @@ class Json2StructConverterTest {
 
     @Test
     fun testParseFalseOnly() {
-        val given = "FalSe"
+        val given = "false"
         val expected = BooleanNode(false)
         val actual = Json2StructConverter(given).asStruct()
 
@@ -36,7 +36,7 @@ class Json2StructConverterTest {
 
     @Test
     fun testParseTrueOnly() {
-        val given = "True"
+        val given = "true"
         val expected = BooleanNode(true)
         val actual = Json2StructConverter(given).asStruct()
 
@@ -123,7 +123,7 @@ class Json2StructConverterTest {
     @Test
     fun testParseObjectWithEveryDatatype() {
         val given = "{" +
-                " 'key1': true,\n" +
+                " \"key1\": true,\n" +
                 " \"key2\": false,\n" +
                 " \"key3\": null,\n" +
                 " \"key4\": 12345,\n" +
@@ -165,17 +165,4 @@ class Json2StructConverterTest {
         assertEquals(expected, actual)
     }
 
-    @Test
-    fun testStripCommentInArray() {
-        val given =
-            "[true, /* comment 1 */ false, /* comment 2 */ /*comment3*/ null, // line comment\n" +
-                    " true // linecomment2 /* comment 4 */\n" +
-                    ", false /* comment5 */ // line comment\n" +
-                    "]"
-        val expected =
-            ArrayNode(listOf(BooleanNode(true), BooleanNode(false), NullNode(), BooleanNode(true), BooleanNode(false)))
-        val actual = Json2StructConverter(given).asStruct()
-
-        assertEquals(expected, actual)
-    }
 }

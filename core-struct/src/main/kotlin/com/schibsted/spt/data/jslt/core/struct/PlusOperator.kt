@@ -4,6 +4,8 @@ package com.schibsted.spt.data.jslt.core.struct
 operator fun TextNode.plus(other: Node): TextNode =
     if (other is NullNode) {
         this
+    } else if (other is TextNode) {
+        TextNode(this.value + other.value)
     } else {
         TextNode(this.value + other.toString())
     }
