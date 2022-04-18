@@ -112,7 +112,7 @@ class Json2StructConverterTest {
 
     @Test
     fun testParseEmptyObject() {
-        val given = "{}"
+        val given = "{ }"
         val expected = ObjectNode(emptyMap())
         val actual = Json2StructConverter(given).asStruct()
 
@@ -137,10 +137,10 @@ class Json2StructConverterTest {
             "key2" to BooleanNode(false),
             "key3" to NullNode(),
             "key4" to IntNode(12345),
-            "key5" to DecimalNode(-1.1),
+            "key5" to DoubleNode(-1.1),
             "key6" to TextNode("some string"),
             "key7" to ObjectNode(mapOf("sub key" to TextNode("sub value"))),
-            "key8" to ArrayNode(listOf(NullNode(), IntNode(1), IntNode(2), IntNode(3))),
+            "key8" to ArrayNode(listOf(NullNode(), IntNode(1), IntNode(2), IntNode(3)))
         ))
         val actual = Json2StructConverter(given).asStruct()
 
@@ -160,6 +160,33 @@ class Json2StructConverterTest {
     fun testParseBooleanArray() {
         val given = "[true, false, null]"
         val expected = ArrayNode(listOf(BooleanNode(true), BooleanNode(false), NullNode()))
+        val actual = Json2StructConverter(given).asStruct()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun testParseNumberArray() {
+        val given =
+            "[0, 1, -1, -1.0, 1.0, -0.1, 0.1, 0E10, -0E10, -1e1, 1e1, 0.1e3, -1.0e308, -1.0e-308, 1.0e308, 1.0e-308]"
+        val expected = ArrayNode(listOf(
+            IntNode(0),
+            IntNode(1),
+            IntNode(-1),
+            DoubleNode(-1.0),
+            DoubleNode(1.0),
+            DoubleNode(-0.1),
+            DoubleNode(0.1),
+            DoubleNode(0.0),
+            DoubleNode(-0.0),
+            DoubleNode(-10.0),
+            DoubleNode(10.0),
+            DoubleNode(100.0),
+            DoubleNode(-1.0e308),
+            DoubleNode(-1.0e-308),
+            DoubleNode(1.0e308),
+            DoubleNode(1.0e-308)
+        ))
         val actual = Json2StructConverter(given).asStruct()
 
         assertEquals(expected, actual)

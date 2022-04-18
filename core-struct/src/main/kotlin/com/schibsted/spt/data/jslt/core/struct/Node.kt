@@ -52,7 +52,7 @@ sealed class Node {
                 } else {
                     val double = str.toDoubleOrNull()
                     if (double != null) {
-                        DecimalNode(double)
+                        DoubleNode(double)
                     } else {
                         BigDecimalNode(BigDecimal(str))
                     }
@@ -86,18 +86,22 @@ sealed class Node {
             companion object {
                 fun fromString(decimal: String, exponent: String? = null): Number {
                     return if (exponent == null) {
+                        // in most cases it will be in the range of a double anyway,
+                        // so we try to convert it and do it twice if it fails
                         val double = decimal.toDoubleOrNull()
                         if (double != null) {
-                            DecimalNode(double)
+                            DoubleNode(double)
                         } else {
                             BigDecimalNode(BigDecimal(decimal))
                         }
                     } else {
                         val decimalAsDouble = decimal.toDouble()
                         val exponentAsInt = exponent.toInt()
-                        if (exponentAsInt > -308 && exponentAsInt < 308) {
-                            DecimalNode(decimalAsDouble * 10.0.pow(exponent.toDouble()))
+                        if (-308 <= exponentAsInt && exponentAsInt <= 308) {
+                            DoubleNode(decimalAsDouble * 10.0.pow(exponent.toDouble()))
                         } else {
+                            println(decimal)
+                            println(exponent)
                             BigDecimalNode(BigDecimal(decimal) * BigDecimal(10).pow(exponentAsInt))
                         }
                     }
@@ -146,7 +150,7 @@ data class BigIntNode(val value: BigInteger) : Node.Number.Integral() {
     override fun toString(): String = value.toString()
 }
 
-data class DecimalNode(val value: Double) : Node.Number.Decimal() {
+data class DoubleNode(val value: Double) : Node.Number.Decimal() {
     override val isDecimal: Boolean = true
     override fun toString(): String = value.toString()
 }

@@ -21,7 +21,7 @@ class JSONTestSuite {
     @MethodSource("invalidJsonList")
     fun `Throws exception for invalid Json`(jsonName: String, json: InputStream) {
         assertThrows<Throwable>("$jsonName: expected to fail, but no exception was thrown!") {
-            println(json.use { Json2StructConverter(it).asStruct() }.toString())
+            json.use { Json2StructConverter(it).asStruct() }.toString()
         }
     }
 
