@@ -21,7 +21,6 @@ sealed class Node {
     open val isBoolean: Boolean = false
     open val isNull: Boolean = false
 
-
     sealed class Complex : Node() {
         abstract val isEmpty: Boolean
         abstract val isNotEmpty: Boolean
@@ -33,32 +32,6 @@ sealed class Node {
 
     sealed class Number : Primitive() {
         override val isNumeric: Boolean = true
-
-        companion object {
-            fun fromString(str: String): Number {
-                val hasDecimalPoint = str.contains('.')
-                return if (!hasDecimalPoint) {
-                    val int = str.toIntOrNull()
-                    if (int != null) {
-                        IntNode(int)
-                    } else {
-                        val long = str.toLongOrNull()
-                        if (long != null) {
-                            LongNode(long)
-                        } else {
-                            BigIntNode(BigInteger(str))
-                        }
-                    }
-                } else {
-                    val double = str.toDoubleOrNull()
-                    if (double != null) {
-                        DoubleNode(double)
-                    } else {
-                        BigDecimalNode(BigDecimal(str))
-                    }
-                }
-            }
-        }
 
         sealed class Integral : Number() {
             override val isIntegral: Boolean = true
@@ -113,7 +86,6 @@ sealed class Node {
     sealed class Constant : Primitive() {
         override val isConstant: Boolean = true
     }
-
 }
 
 data class ObjectNode(val values: Map<String, Node>) : Node.Complex() {
@@ -121,14 +93,14 @@ data class ObjectNode(val values: Map<String, Node>) : Node.Complex() {
     override val isNotEmpty: Boolean = values.isNotEmpty()
     override val isObject: Boolean = true
     override fun toString(): String =
-        values.map { (key, value) -> "\"$key\" : $value" }.joinToString(separator = ", ", prefix = "{ ", postfix = " }")
+        values.map { (key, value) -> "\"$key\":$value" }.joinToString(separator = ",", prefix = "{", postfix = "}")
 }
 
 data class ArrayNode(val values: List<Node>) : Node.Complex() {
     override val isEmpty: Boolean = values.isEmpty()
     override val isNotEmpty: Boolean = values.isNotEmpty()
     override val isArray: Boolean = true
-    override fun toString(): String = values.joinToString(separator = ", ", prefix = "[ ", postfix = " ]")
+    override fun toString(): String = values.joinToString(separator = ",", prefix = "[", postfix = "]")
 }
 
 
