@@ -35,7 +35,7 @@
    {
       "input" : "{}",
       "query" : "232 + {\"foo\":34}",
-      "error" : "convert"
+      "error" : "Can't compare 232 and {\"foo\":34}"
    },
    {
       "error" : "Parse error",
@@ -53,7 +53,7 @@
       "input" : "{}"
    },
    {
-      "error" : "convert",
+      "error" : "Can't compare 232 and false",
       "input" : "{}",
       "query" : "232 + false"
    },
@@ -75,7 +75,7 @@
    {
       "input" : "{}",
       "query" : "232 + [4,5]",
-      "error" : "convert"
+      "error" : "Can't compare 232 and [4,5]"
    },
    {
       "input" : "{}",

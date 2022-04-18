@@ -8,6 +8,7 @@ buildscript {
     }
 }
 plugins {
+    id("org.jetbrains.kotlin.jvm") version "1.6.20"
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'com.intershop.gradle.javacc' version '4.0.1'
     id 'java'
@@ -15,12 +16,11 @@ plugins {
     id 'maven-publish'
     id 'signing'
 }
-apply plugin: 'kotlin'
+
 // apply plugin: 'jacoco' (fails in JDK 11 on Travis)
 
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 

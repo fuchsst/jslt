@@ -43,6 +43,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToLong
 
+
 /**
  * For now contains all the various function implementations. Should
  * probably be broken up into separate files and use annotations to
@@ -76,7 +77,7 @@ object BuiltinFunctions {
         buf: CharArray,
         bufix: Int,
         from: Int,
-        to: Int
+        to: Int,
     ): Int {
         var localBufferIndex = bufix
         for (ix in from until to) buf[localBufferIndex++] = input!![ix]
@@ -363,7 +364,7 @@ object BuiltinFunctions {
     class Fallback : AbstractMacro("fallback", 2, 1024) {
         override fun call(
             scope: Scope, input: JsonNode,
-            parameters: kotlin.Array<ExpressionNode>
+            parameters: kotlin.Array<ExpressionNode>,
         ): JsonNode {
             // making this a macro means we can evaluate only the parameters
             // that are necessary to find a value, and leave the rest
@@ -590,6 +591,41 @@ object BuiltinFunctions {
         override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
             val string = arguments[0].asNullableString() ?: return NullNode.instance
             return TextNode(string.trim { it <= ' ' })
+        }
+    }
+
+    // ===== UUID
+
+    // ===== UUID
+    class Uuid : AbstractFunction("uuid", 0, 2) {
+        private fun maskMSB(number: Long): Long {
+            val version = (1 shl 12).toLong()
+            val least12SignificantBit = number and 0x000000000000FFFFL shr 4
+            return (number and -0x10000L) + version + least12SignificantBit
+        }
+
+        private fun maskLSB(number: Long): Long {
+            val LSB_MASK = 0x3FFFFFFFFFFFFFFFL
+            val LSB_VARIANT3_BITFLAG = 0x8000000000000000UL.toLong()
+            return (number and LSB_MASK) + LSB_VARIANT3_BITFLAG
+        }
+
+        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode? {
+            val uuid: String = if (arguments.isEmpty()) {
+                UUID.randomUUID().toString()
+            } else if (arguments.size == 2) {
+                // NIL UUID is a special case defined in 4.1.7 of the RFC (https://www.ietf.org/rfc/rfc4122.txt)
+                if (arguments[0].isNull && arguments[1].isNull) {
+                    "00000000-0000-0000-0000-000000000000"
+                } else {
+                    val msb: Long = arguments[0].longValue()
+                    val lsb: Long = arguments[1].longValue()
+                    UUID(maskMSB(msb), maskLSB(lsb)).toString()
+                }
+            } else {
+                throw JsltException("Build-in UUID function must be called with either none or two parameters.")
+            }
+            return TextNode(uuid)
         }
     }
 
@@ -851,6 +887,7 @@ object BuiltinFunctions {
         functions["to-json"] = ToJson()
         functions["replace"] = Replace()
         functions["trim"] = Trim()
+        functions["uuid"] = Uuid()
 
         // BOOLEAN
         functions["not"] = Not()
