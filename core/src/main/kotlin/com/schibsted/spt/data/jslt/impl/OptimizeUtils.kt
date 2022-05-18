@@ -13,9 +13,6 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
-import com.schibsted.spt.data.jslt.impl.expressions.LiteralExpression
-
 object OptimizeUtils {
 
 }

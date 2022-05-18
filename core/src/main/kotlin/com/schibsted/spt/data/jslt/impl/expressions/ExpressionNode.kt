@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.PreparationContext
 import com.schibsted.spt.data.jslt.impl.Scope
 
@@ -25,7 +25,7 @@ import com.schibsted.spt.data.jslt.impl.Scope
  * byte-code, etc).
  */
 interface ExpressionNode {
-    fun apply(scope: Scope?, input: JsonNode?): JsonNode
+    fun apply(scope: Scope?, input: Node?): Node
 
     // writes debug info to stdout
     fun dump(level: Int)

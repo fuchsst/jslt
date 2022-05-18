@@ -14,13 +14,13 @@
 package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.databind.node.*
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.*
 import com.schibsted.spt.data.jslt.impl.*
 import com.schibsted.spt.data.jslt.impl.operator.comparison.EqualsComparison
 import com.schibsted.spt.data.jslt.impl.operator.comparison.compareTo
@@ -88,7 +88,7 @@ object BuiltinFunctions {
 
     // ===== NUMBER
     class Number : AbstractFunction("number", 1, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             return if (arguments.size == 1)
                 number(arguments[0], true, null)
             else
@@ -98,7 +98,7 @@ object BuiltinFunctions {
 
     // ===== ROUND
     class Round : AbstractFunction("round", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val number = arguments[0]
             if (number.isNull)
                 return NullNode.instance
@@ -110,7 +110,7 @@ object BuiltinFunctions {
 
     // ===== FLOOR
     class Floor : AbstractFunction("floor", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val number = arguments[0]
             if (number.isNull)
                 return NullNode.instance
@@ -122,7 +122,7 @@ object BuiltinFunctions {
 
     // ===== CEILING
     class Ceiling : AbstractFunction("ceiling", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val number = arguments[0]
             if (number.isNull)
                 return NullNode.instance
@@ -134,7 +134,7 @@ object BuiltinFunctions {
 
     // ===== RANDOM
     class Random : AbstractFunction("random", 0, 0) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode =
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node =
             DoubleNode(random.nextDouble())
 
         companion object {
@@ -144,7 +144,7 @@ object BuiltinFunctions {
 
     // ===== SUM
     class Sum : AbstractFunction("sum", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val array = arguments[0]
             if (array.isNull)
                 return NullNode.instance
@@ -164,7 +164,7 @@ object BuiltinFunctions {
 
     // ===== MODULO
     class Modulo : AbstractFunction("modulo", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val dividend = arguments[0]
             if (dividend.isNull) return NullNode.instance else if (!dividend.isNumber) throw JsltException("mod(): dividend cannot be a non-number: $dividend")
             val divisor = arguments[1]
@@ -186,7 +186,7 @@ object BuiltinFunctions {
 
     // ===== HASH-INT
     class HashInt : AbstractFunction("hash-int", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val node = arguments[0]
             return if (node.isNull)
                 NullNode.instance
@@ -212,14 +212,14 @@ object BuiltinFunctions {
 
     // ===== TEST
     class Test : AbstractRegexpFunction("test", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             // if data is missing then it doesn't match, end of story
             if (arguments[0].isNull) return BooleanNode.FALSE
             val string = arguments[0].asString()
             val regexp = arguments[1].asString(JsltException("test() can't test null regexp"))
             val p = getRegexp(regexp)
             val m = p.matcher(string)
-            return m.find(0).toJsonNode()
+            return m.find(0).toNode()
         }
     }
 
@@ -229,7 +229,7 @@ object BuiltinFunctions {
     // names of the named groups are. so we have to use regexps to
     // parse the regexps. (lots of swearing omitted.)
     class Capture : AbstractRegexpFunction("capture", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             // if data is missing then it doesn't match, end of story
             if (arguments[0].isNull) return arguments[0] // null
             val string = arguments[0].asString()
@@ -290,19 +290,19 @@ object BuiltinFunctions {
     }
 
     class Split : AbstractRegexpFunction("split", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             // if input string is missing then we're doing nothing
             if (arguments[0].isNull) return arguments[0] // null
             val string = arguments[0].asString()
             val split = arguments[1].asString(JsltException("split() can't split on null"))
 
-            return toJsonNode(string.split(split).toTypedArray())
+            return toNode(string.split(split).toTypedArray())
         }
     }
 
     // ===== LOWERCASE
     class Lowercase : AbstractFunction("lowercase", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             // if input string is missing then we're doing nothing
             if (arguments[0].isNull) return arguments[0] // null
             val string = arguments[0].asString()
@@ -312,7 +312,7 @@ object BuiltinFunctions {
 
     // ===== UPPERCASE
     class Uppercase : AbstractFunction("uppercase", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             // if input string is missing then we're doing nothing
             if (arguments[0].isNull) return arguments[0] // null
             val string = arguments[0].asString()
@@ -329,7 +329,7 @@ object BuiltinFunctions {
         }
 
         @OptIn(ExperimentalUnsignedTypes::class)
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             // if input string is missing then we're doing nothing
             if (arguments[0].isNull) return arguments[0] // null
             val message = arguments[0].asString()
@@ -341,31 +341,31 @@ object BuiltinFunctions {
 
     // ===== NOT
     class Not : AbstractFunction("not", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return (!arguments[0].isTrue()).toJsonNode()
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
+            return (!arguments[0].isTrue()).toNode()
         }
     }
 
     // ===== BOOLEAN
     class Boolean : AbstractFunction("boolean", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return arguments[0].isTrue().toJsonNode()
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
+            return arguments[0].isTrue().toNode()
         }
     }
 
     // ===== IS-BOOLEAN
     class IsBoolean : AbstractFunction("is-boolean", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return arguments[0].isBoolean.toJsonNode()
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
+            return arguments[0].isBoolean.toNode()
         }
     }
 
     // ===== FALLBACK
     class Fallback : AbstractMacro("fallback", 2, 1024) {
         override fun call(
-            scope: Scope, input: JsonNode,
+            scope: Scope, input: Node,
             parameters: kotlin.Array<ExpressionNode>,
-        ): JsonNode {
+        ): Node {
             // making this a macro means we can evaluate only the parameters
             // that are necessary to find a value, and leave the rest
             // untouched, giving better performance
@@ -379,14 +379,14 @@ object BuiltinFunctions {
 
     // ===== IS-OBJECT
     class IsObject : AbstractFunction("is-object", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return arguments[0].isObject.toJsonNode()
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
+            return arguments[0].isObject.toNode()
         }
     }
 
     // ===== GET-KEY
     class GetKey : AbstractFunction("get-key", 2, 3) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val key = arguments[1].asNullableString() ?: return NullNode.instance
             val obj = arguments[0]
             return when {
@@ -402,14 +402,14 @@ object BuiltinFunctions {
 
     // ===== IS-ARRAY
     class IsArray : AbstractFunction("is-array", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return arguments[0].isArray.toJsonNode()
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
+            return arguments[0].isArray.toNode()
         }
     }
 
     // ===== ARRAY
     class Array : AbstractFunction("array", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val value = arguments[0]
             return if (value.isNull || value.isArray)
                 value
@@ -422,7 +422,7 @@ object BuiltinFunctions {
 
     // ===== FLATTEN
     class Flatten : AbstractFunction("flatten", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val value = arguments[0]
             if (value.isNull) return value else if (!value.isArray) throw JsltException("flatten() cannot operate on $value")
             val array = objectMapper.createArrayNode()
@@ -430,7 +430,7 @@ object BuiltinFunctions {
             return array
         }
 
-        private fun flatten(array: ArrayNode, current: JsonNode) {
+        private fun flatten(array: ArrayNode, current: Node) {
             for (ix in 0 until current.size()) {
                 val node = current[ix]
                 if (node.isArray) flatten(array, node) else array.add(node)
@@ -440,7 +440,7 @@ object BuiltinFunctions {
 
     // ===== ALL
     class All : AbstractFunction("all", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val value = arguments[0]
             if (value.isNull) return value else if (!value.isArray) throw JsltException("all() requires an array, not $value")
             for (ix in 0 until value.size()) {
@@ -453,7 +453,7 @@ object BuiltinFunctions {
 
     // ===== ANY
     class Any : AbstractFunction("any", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val value = arguments[0]
             if (value.isNull) return value else if (!value.isArray) throw JsltException("any() requires an array, not $value")
             for (ix in 0 until value.size()) {
@@ -465,7 +465,7 @@ object BuiltinFunctions {
 
     // ===== ZIP
     class Zip : AbstractFunction("zip", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val array1 = arguments[0]
             val array2 = arguments[1]
             if (array1.isNull || array2.isNull) return NullNode.instance else if (!array1.isArray || !array2.isArray) throw JsltException(
@@ -484,7 +484,7 @@ object BuiltinFunctions {
 
     // ===== ZIP-WITH-INDEX
     class ZipWithIndex : AbstractFunction("zip-with-index", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val arrayIn = arguments[0]
             if (arrayIn.isNull) return NullNode.instance else if (!arrayIn.isArray) throw JsltException("zip-with-index() argument must be an array")
             val arrayOut = objectMapper.createArrayNode()
@@ -500,7 +500,7 @@ object BuiltinFunctions {
 
     // ===== INDEX-OF
     class IndexOf : AbstractFunction("index-of", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val array = arguments[0]
             if (array.isNull) return NullNode.instance else if (!array.isArray) throw JsltException("index-of() first argument must be an array")
             val value = arguments[1]
@@ -513,25 +513,25 @@ object BuiltinFunctions {
 
     // ===== STARTS-WITH
     class StartsWith : AbstractFunction("starts-with", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val string = arguments[0].asNullableString() ?: return BooleanNode.FALSE
             val prefix = arguments[1].asString()
-            return string.startsWith(prefix).toJsonNode()
+            return string.startsWith(prefix).toNode()
         }
     }
 
     // ===== ENDS-WITH
     class EndsWith : AbstractFunction("ends-with", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val string = arguments[0].asNullableString() ?: return BooleanNode.FALSE
             val suffix = arguments[1].asString()
-            return string.endsWith(suffix).toJsonNode()
+            return string.endsWith(suffix).toNode()
         }
     }
 
     // ===== FROM-JSON
     class FromJson : AbstractFunction("from-json", 1, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val json = arguments[0].asNullableString() ?: return NullNode.instance
             return try {
                 objectMapper.readTree(json) ?: // if input is "", for example
@@ -545,7 +545,7 @@ object BuiltinFunctions {
 
     // ===== TO-JSON
     class ToJson : AbstractFunction("to-json", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             return try {
                 val json = objectMapper.writeValueAsString(arguments[0])
                 TextNode(json)
@@ -557,7 +557,7 @@ object BuiltinFunctions {
 
     // ===== REPLACE
     class Replace : AbstractRegexpFunction("replace", 3, 3) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val string = arguments[0].asNullableString() ?: return NullNode.instance
             val regexp = arguments[1].asString()
             val sep = arguments[2].asString()
@@ -588,7 +588,7 @@ object BuiltinFunctions {
 
     // ===== TRIM
     class Trim : AbstractFunction("trim", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val string = arguments[0].asNullableString() ?: return NullNode.instance
             return TextNode(string.trim { it <= ' ' })
         }
@@ -610,7 +610,7 @@ object BuiltinFunctions {
             return (number and LSB_MASK) + LSB_VARIANT3_BITFLAG
         }
 
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode? {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node? {
             val uuid: String = if (arguments.isEmpty()) {
                 UUID.randomUUID().toString()
             } else if (arguments.size == 2) {
@@ -631,7 +631,7 @@ object BuiltinFunctions {
 
     // ===== JOIN
     class Join : AbstractFunction("join", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val array = toArray(arguments[0], true) ?: return NullNode.instance
             val sep = arguments[1].asString()
             val buf = StringBuilder()
@@ -645,7 +645,7 @@ object BuiltinFunctions {
 
     // ===== CONTAINS
     class Contains : AbstractFunction("contains", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             when {
                 arguments[1].isNull -> return BooleanNode.FALSE // nothing is contained in null
                 arguments[1].isArray -> {
@@ -653,12 +653,12 @@ object BuiltinFunctions {
                 }
                 arguments[1].isObject -> {
                     val key = arguments[0].asNullableString() ?: return BooleanNode.FALSE
-                    return arguments[1].has(key).toJsonNode()
+                    return arguments[1].has(key).toNode()
                 }
                 arguments[1].isTextual -> {
                     val sub = arguments[0].asNullableString() ?: return BooleanNode.FALSE
                     val str = arguments[1].asText()
-                    return (str.indexOf(sub) != -1).toJsonNode()
+                    return (str.indexOf(sub) != -1).toNode()
                 }
                 else -> throw JsltException("Contains cannot operate on " + arguments[1])
             }
@@ -668,7 +668,7 @@ object BuiltinFunctions {
 
     // ===== SIZE
     class Size : AbstractFunction("size", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             return if (arguments[0].isArray || arguments[0].isObject) IntNode(arguments[0].size()) else if (arguments[0].isTextual) IntNode(
                 arguments[0].asText().length
             ) else if (arguments[0].isNull) arguments[0] else throw JsltException(
@@ -679,7 +679,7 @@ object BuiltinFunctions {
 
     // ===== ERROR
     class Error : AbstractFunction("error", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val msg = arguments[0].asString()
             throw JsltException("error: $msg")
         }
@@ -687,53 +687,53 @@ object BuiltinFunctions {
 
     // ===== STRING
     class ToString : AbstractFunction("string", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             return if (arguments[0].isTextual) arguments[0] else TextNode(arguments[0].toString())
         }
     }
 
     // ===== IS-STRING
     class IsString : AbstractFunction("is-string", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return arguments[0].isTextual.toJsonNode()
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
+            return arguments[0].isTextual.toNode()
         }
     }
 
     // ===== IS-NUMBER
     class IsNumber : AbstractFunction("is-number", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return arguments[0].isNumber.toJsonNode()
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
+            return arguments[0].isNumber.toNode()
         }
     }
 
     // ===== IS-INTEGER
     class IsInteger : AbstractFunction("is-integer", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return arguments[0].isIntegralNumber.toJsonNode()
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
+            return arguments[0].isIntegralNumber.toNode()
         }
     }
 
     // ===== IS-DECIMAL
     class IsDecimal : AbstractFunction("is-decimal", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
-            return arguments[0].isFloatingPointNumber.toJsonNode()
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
+            return arguments[0].isFloatingPointNumber.toNode()
         }
     }
 
     // ===== NOW
     class Now : AbstractFunction("now", 0, 0) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val ms = System.currentTimeMillis()
-            return (ms / 1000.0).toJsonNode()
+            return (ms / 1000.0).toNode()
         }
     }
 
     // ===== PARSE-TIME
     class ParseTime : AbstractFunction("parse-time", 2, 3) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val text = arguments[0].asNullableString() ?: return NullNode.instance
             val formatStr = arguments[1].asString()
-            var fallback: JsonNode? = null
+            var fallback: Node? = null
             if (arguments.size > 2) fallback = arguments[2]
 
             // the performance of this could be better, but it's not so easy
@@ -743,7 +743,7 @@ object BuiltinFunctions {
                 val format = SimpleDateFormat(formatStr)
                 format.timeZone = SimpleTimeZone(0, "UTC")
                 val time = format.parse(text)
-                (time.time / 1000.0).toJsonNode()
+                (time.time / 1000.0).toNode()
             } catch (e: IllegalArgumentException) {
                 // thrown if format is bad
                 throw JsltException("parse-time: Couldn't parse format '$formatStr': ${e.message}")
@@ -759,7 +759,7 @@ object BuiltinFunctions {
             val zonenames: Set<String?> = TimeZone.getAvailableIDs().toSet()
         }
 
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             val number = number(arguments[0], null)
             if (number.isNull) return NullNode.instance
             val timestamp = number.asDouble()
@@ -788,7 +788,7 @@ object BuiltinFunctions {
 
     // ===== MIN
     class Min : AbstractFunction("min", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             // this works because null is the smallest of all values
             return if (arguments[0] < arguments[1])
                 arguments[0] else arguments[1]
@@ -797,7 +797,7 @@ object BuiltinFunctions {
 
     // ===== MAX
     class Max : AbstractFunction("max", 2, 2) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             return if (arguments[0].isNull || arguments[1].isNull)
                 NullNode.instance
             else if (arguments[0] > arguments[1])
@@ -809,7 +809,7 @@ object BuiltinFunctions {
 
     // ===== PARSE-URL
     class ParseUrl : AbstractFunction("parse-url", 1, 1) {
-        override fun call(input: JsonNode, arguments: kotlin.Array<JsonNode>): JsonNode {
+        override fun call(input: Node, arguments: kotlin.Array<Node>): Node {
             if (arguments[0].isNull) return NullNode.instance
             val urlString = arguments[0].asText()
             return try {
@@ -822,12 +822,12 @@ object BuiltinFunctions {
                 if (aURL.query != null && aURL.query.isNotEmpty()) {
                     objectNode.put("query", aURL.query)
                     val queryParamsNode = objectMapper.createObjectNode()
-                    objectNode.set<JsonNode>("parameters", queryParamsNode)
+                    objectNode.set<Node>("parameters", queryParamsNode)
                     val pairs = aURL.query.split("&").toTypedArray()
                     for (pair in pairs) {
                         val idx = pair.indexOf("=")
                         val key = if (idx > 0) URLDecoder.decode(pair.substring(0, idx), "UTF-8") else pair
-                        if (!queryParamsNode.has(key)) queryParamsNode.set<JsonNode>(
+                        if (!queryParamsNode.has(key)) queryParamsNode.set<Node>(
                             key,
                             objectMapper.createArrayNode()
                         )

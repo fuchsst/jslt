@@ -13,10 +13,10 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.TextNode
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
+import com.schibsted.spt.data.jslt.core.struct.NullNode
+import com.schibsted.spt.data.jslt.core.struct.TextNode
 import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.util.indent
@@ -33,7 +33,7 @@ data class ArraySlicer(// can be null
     override var location: Location?
 ) : AbstractNode(location) {
 
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: Node?): Node {
         val sequence = parent!!.apply(scope, input)
         if (!sequence.isArray && !sequence.isTextual) return NullNode.instance
         var size = sequence.size()
@@ -64,7 +64,7 @@ data class ArraySlicer(// can be null
 
     private fun resolveIndex(
         scope: Scope, expr: ExpressionNode?,
-        input: JsonNode, size: Int, ifnull: Int
+        input: Node, size: Int, ifnull: Int
     ): Int {
         if (expr == null) return ifnull
         val node = expr.apply(scope, input)

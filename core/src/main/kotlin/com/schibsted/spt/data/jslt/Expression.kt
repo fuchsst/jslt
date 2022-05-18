@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 
 /**
  * Represents a compiled JSLT expression.
@@ -29,7 +29,7 @@ interface Expression {
      * Evaluate the expression on the given JSON input.
      * @param input The JSON input to evaluate the expression on.
      */
-    fun apply(input: JsonNode?): JsonNode
+    fun apply(input: Node?): Node
 
     /**
      * Evaluate the expression on the given JSON input, with the given
@@ -37,5 +37,5 @@ interface Expression {
      * @param variables Variable bindings visible inside the expression.
      * @param input The JSON input to evaluate the expression on.
      */
-    fun apply(variables: Map<String, JsonNode>, input: JsonNode?): JsonNode
+    fun apply(variables: Map<String, Node>, input: Node?): Node
 }

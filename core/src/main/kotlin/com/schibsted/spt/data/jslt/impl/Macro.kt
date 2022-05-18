@@ -13,8 +13,8 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.Callable
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 
 /**
@@ -28,5 +28,5 @@ interface Macro : Callable {
      * Invokes the macro, which can then modify the input node and
      * evaluate the parameters as needed.
      */
-    fun call(scope: Scope, input: JsonNode, parameters: Array<ExpressionNode>): JsonNode?
+    fun call(scope: Scope, input: Node, parameters: Array<ExpressionNode>): Node?
 }

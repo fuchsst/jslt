@@ -13,10 +13,10 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator.numeric
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.DoubleNode
-import com.fasterxml.jackson.databind.node.LongNode
-import com.fasterxml.jackson.databind.node.NullNode
+import com.schibsted.spt.data.jslt.core.struct.DoubleNode
+import com.schibsted.spt.data.jslt.core.struct.LongNode
+import com.schibsted.spt.data.jslt.core.struct.Node
+import com.schibsted.spt.data.jslt.core.struct.NullNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.util.number
@@ -25,7 +25,7 @@ class DivideOperator(
     left: ExpressionNode, right: ExpressionNode,
     location: Location?
 ) : NumericOperator(left, right, "/", location) {
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode {
+    override fun perform(v1: Node, v2: Node): Node {
         if (v1.isNull || v2.isNull) return NullNode.instance
 
         // we only support the numeric operation and nothing else

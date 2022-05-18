@@ -13,12 +13,12 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.NullNode
 import com.schibsted.spt.data.jslt.Callable
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.Module
+import com.schibsted.spt.data.jslt.core.struct.ArrayNode
+import com.schibsted.spt.data.jslt.core.struct.Node
+import com.schibsted.spt.data.jslt.core.struct.NullNode
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.util.convertObjectToArray
 import com.schibsted.spt.data.jslt.impl.util.objectMapper
@@ -41,9 +41,9 @@ class ExperimentalModule : Module {
 
     class GroupBy : AbstractCallable("group-by", 3, 3), Macro {
         override fun call(
-            scope: Scope, input: JsonNode,
+            scope: Scope, input: Node,
             parameters: Array<ExpressionNode>
-        ): JsonNode? {
+        ): Node? {
             // this has to be a macro, because the second argument needs to be
             // evaluated in a special context
 
@@ -55,7 +55,7 @@ class ExperimentalModule : Module {
             )
 
             // now start grouping
-            val groups: MutableMap<JsonNode?, ArrayNode?> = HashMap()
+            val groups: MutableMap<Node?, ArrayNode?> = HashMap()
             for (ix in 0 until array.size()) {
                 val groupInput = array[ix]
                 val key = parameters[1].apply(scope, groupInput)
@@ -72,8 +72,8 @@ class ExperimentalModule : Module {
             val result = objectMapper.createArrayNode()
             for (key in groups.keys) {
                 val group = objectMapper.createObjectNode()
-                group.set<JsonNode>("key", key)
-                group.set<JsonNode>("values", groups[key])
+                group.set<Node>("key", key)
+                group.set<Node>("values", groups[key])
                 result.add(group)
             }
             return result

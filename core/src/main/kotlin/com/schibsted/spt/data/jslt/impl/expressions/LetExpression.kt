@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.ScopeManager
@@ -26,7 +26,7 @@ class LetExpression(val variable: String, var declaration: ExpressionNode, locat
         private set
     private var info: VariableInfo? = null
 
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: Node?): Node {
         return declaration.apply(scope, input)
     }
 

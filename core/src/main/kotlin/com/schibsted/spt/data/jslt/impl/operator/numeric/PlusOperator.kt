@@ -13,9 +13,9 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator.numeric
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.*
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.*
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.util.asNullableString
@@ -27,7 +27,7 @@ class PlusOperator(
     location: Location?
 ) : NumericOperator(left, right, "+", location) {
 
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode {
+    override fun perform(v1: Node, v2: Node): Node {
        return try {
            v1 + v2
        } catch (e:Exception) {
@@ -42,7 +42,7 @@ class PlusOperator(
 }
 
 
-operator fun JsonNode.plus(other:JsonNode): JsonNode {
+operator fun Node.plus(other:Node): Node {
     return when {
         this.isTextual || other.isTextual -> {
             // if one operand is string: do string concatenation

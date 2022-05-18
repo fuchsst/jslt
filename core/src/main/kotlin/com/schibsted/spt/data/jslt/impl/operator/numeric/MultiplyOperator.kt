@@ -13,18 +13,18 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator.numeric
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.TextNode
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
+import com.schibsted.spt.data.jslt.core.struct.TextNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 
 class MultiplyOperator(
     left: ExpressionNode, right: ExpressionNode,
-    location: Location?
+    location: Location?,
 ) : NumericOperator(left, right, "*", location) {
 
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode {
+    override fun perform(v1: Node, v2: Node): Node {
         return if (v1.isTextual || v2.isTextual) {
             // if one operand is string: do string multiplication
             val str: String

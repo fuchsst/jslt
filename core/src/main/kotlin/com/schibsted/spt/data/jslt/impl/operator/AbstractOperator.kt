@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
@@ -32,7 +32,7 @@ abstract class AbstractOperator(
     location: Location?
 ) : AbstractNode(location) {
 
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: Node?): Node {
         val v1 = left.apply(scope, input)
         val v2 = right.apply(scope, input)
         return perform(v1, v2)
@@ -66,7 +66,7 @@ abstract class AbstractOperator(
         return listOf(left, right)
     }
 
-    abstract fun perform(v1: JsonNode, v2: JsonNode): JsonNode
+    abstract fun perform(v1: Node, v2: Node): Node
 
     override fun toString(): String {
         val first = if (left is AbstractOperator) "($left)" else left.toString()

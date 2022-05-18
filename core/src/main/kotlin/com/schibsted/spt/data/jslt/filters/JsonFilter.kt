@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.filters
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 
 /**
  * A filter that can approve/disapprove a JSON value. Used to
@@ -23,5 +23,5 @@ interface JsonFilter {
     /**
      * Whether or not to accept this value.
      */
-    fun filter(value: JsonNode): Boolean
+    fun filter(value: Node): Boolean
 }

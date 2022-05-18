@@ -133,11 +133,18 @@ data class BigDecimalNode(val value: BigDecimal) : Node.Number.Decimal() {
 }
 
 data class BooleanNode(val value: Boolean) : Node.Constant() {
+    companion object {
+        val TRUE = BooleanNode(true)
+        val FALSE = BooleanNode(false)
+    }
     override val isBoolean: Boolean = true
     override fun toString(): String = value.toString()
 }
 
 data class NullNode(val value: Nothing? = null) : Node.Constant() {
+    companion object {
+        val instance = NullNode()
+    }
     override val isNull: Boolean = true
     override fun toString(): String = "null"
 }

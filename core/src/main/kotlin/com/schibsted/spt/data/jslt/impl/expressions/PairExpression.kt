@@ -13,8 +13,8 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.util.indent
@@ -29,7 +29,7 @@ class PairExpression(
 ) :
     AbstractNode(location) {
 
-    fun applyKey(scope: Scope?, input: JsonNode?): String {
+    fun applyKey(scope: Scope?, input: Node?): String {
         val v = key.apply(scope, input)
         if (!v.isTextual) {
             throw JsltException("Object key must be string", location)
@@ -43,7 +43,7 @@ class PairExpression(
             return key.apply(null, null).asText()
         }
 
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: Node?): Node {
         return value.apply(scope, input)
     }
 

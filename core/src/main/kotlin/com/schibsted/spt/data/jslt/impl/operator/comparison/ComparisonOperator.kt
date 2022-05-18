@@ -13,8 +13,8 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator.comparison
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.operator.AbstractOperator
@@ -27,7 +27,7 @@ sealed class ComparisonOperator(
     location: Location?
 ) : AbstractOperator(left, right, operator, location)
 
-operator fun JsonNode.compareTo(other: JsonNode): Int {
+operator fun Node.compareTo(other: Node): Int {
     return when {
         this.isNumber && other.isNumber -> {
             val n1 = number(this)

@@ -14,15 +14,15 @@
 package com.schibsted.spt.data.jslt.impl.expressions
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.util.indent
 import com.schibsted.spt.data.jslt.impl.util.objectMapper
 
-class LiteralExpression(private val value: JsonNode, location: Location?) : AbstractNode(location) {
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+class LiteralExpression(private val value: Node, location: Location?) : AbstractNode(location) {
+    override fun apply(scope: Scope?, input: Node?): Node {
         return value
     }
 

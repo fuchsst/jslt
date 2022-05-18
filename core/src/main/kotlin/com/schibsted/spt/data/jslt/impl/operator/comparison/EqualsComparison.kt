@@ -13,10 +13,9 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator.comparison
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
-import com.schibsted.spt.data.jslt.impl.operator.AbstractOperator
 import com.schibsted.spt.data.jslt.impl.util.toJsonNode
 
 class EqualsComparison(
@@ -25,10 +24,10 @@ class EqualsComparison(
     location: Location?
 ) : ComparisonOperator(left, right, "==", location) {
 
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = equals(v1, v2).toJsonNode()
+    override fun perform(v1: Node, v2: Node): Node = equals(v1, v2).toJsonNode()
 
     companion object {
-        fun equals(v1: JsonNode, v2: JsonNode): Boolean {
+        fun equals(v1: Node, v2: Node): Boolean {
             return if (v1.isNumber && v2.isNumber) {
                 // unfortunately, comparison of numeric nodes in Jackson is
                 // deliberately less helpful than what we need here. so we have

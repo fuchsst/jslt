@@ -13,10 +13,9 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator.comparison
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
-import com.schibsted.spt.data.jslt.impl.operator.AbstractOperator
 import com.schibsted.spt.data.jslt.impl.util.toJsonNode
 
 class UnequalsComparison(
@@ -24,5 +23,5 @@ class UnequalsComparison(
     location: Location?
 ) : ComparisonOperator(left, right, "!=", location) {
 
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = (!EqualsComparison.equals(v1, v2)).toJsonNode()
+    override fun perform(v1: Node, v2: Node): Node = (!EqualsComparison.equals(v1, v2)).toJsonNode()
 }

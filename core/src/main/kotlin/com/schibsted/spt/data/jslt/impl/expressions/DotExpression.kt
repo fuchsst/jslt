@@ -13,8 +13,8 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
+import com.schibsted.spt.data.jslt.core.struct.Node
+import com.schibsted.spt.data.jslt.core.struct.NullNode
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.util.indent
@@ -25,7 +25,7 @@ open class DotExpression(
     override var location: Location?
 ) : AbstractNode(location) {
 
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: Node?): Node {
         // if there is no key we just return the input
         if (key == null) return input!!
 

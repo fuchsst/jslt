@@ -7,7 +7,6 @@ import org.junit.Assert
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.Reader
-import java.util.*
 
 /**
  * Utilities for test cases.

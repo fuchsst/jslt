@@ -13,8 +13,8 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.filters.JsonFilter
 import com.schibsted.spt.data.jslt.impl.expressions.AbstractNode
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
@@ -34,7 +34,7 @@ class ObjectComprehension(
     private val filter: JsonFilter
 ) : AbstractNode(location) {
 
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: Node?): Node {
         var sequence = loop.apply(scope, input)
         if (sequence.isNull) return sequence else if (sequence.isObject) sequence =
             sequence.convertObjectToArray() else if (!sequence.isArray) throw JsltException(
@@ -55,7 +55,7 @@ class ObjectComprehension(
                         "Object comprehension must have string as key, not $keyNode",
                         location
                     )
-                    `object`.set<JsonNode>(keyNode.asText(), valueNode)
+                    `object`.set<Node>(keyNode.asText(), valueNode)
                 }
             }
         }

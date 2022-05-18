@@ -13,9 +13,9 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.expressions.*
 import com.schibsted.spt.data.jslt.impl.util.evalLets
 
@@ -37,11 +37,11 @@ class FunctionDeclaration(
     // (or at least may need) access to the global scope. in order to be
     // able to treat FunctionDeclaration like other Functions we resort
     // to this solution for now.
-    override fun call(input: JsonNode, arguments: Array<JsonNode>): JsonNode {
+    override fun call(input: Node, arguments: Array<Node>): Node {
         throw JsltException("INTERNAL ERROR!")
     }
 
-    fun call(scope: Scope, input: JsonNode, arguments: Array<JsonNode>): JsonNode {
+    fun call(scope: Scope, input: Node, arguments: Array<Node>): Node {
         scope.enterFunction(stackFrameSize)
 
         // bind the arguments into the function scope
@@ -64,7 +64,7 @@ class FunctionDeclaration(
 
     // the ExpressionNode API requires this method, but it doesn't
     // actually make any sense for a Function
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: Node?): Node {
         throw JsltException("INTERNAL ERROR")
     }
 

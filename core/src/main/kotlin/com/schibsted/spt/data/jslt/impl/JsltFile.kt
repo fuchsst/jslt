@@ -13,11 +13,11 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.Callable
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
 import com.schibsted.spt.data.jslt.Module
+import com.schibsted.spt.data.jslt.core.struct.Node
 
 /**
  * Represents a JSLT source code file loaded separately.
@@ -34,7 +34,7 @@ class JsltFile(
     override val minArguments: Int = 1
     override val maxArguments: Int = 1
 
-    override fun call(input: JsonNode, arguments: Array<JsonNode>): JsonNode {
+    override fun call(input: Node, arguments: Array<Node>): Node {
         if (!body.hasBody()) throw JsltException(
             "Module '" + prefix + "' has no body, so cannot " +
                     "be called as a function"
@@ -44,5 +44,5 @@ class JsltFile(
         return body.apply(arguments[0])
     }
 
-    fun evaluateLetsOnly(scope: Scope?, input: JsonNode) = body.evaluateLetsOnly(scope, input)
+    fun evaluateLetsOnly(scope: Scope?, input: Node) = body.evaluateLetsOnly(scope, input)
 }

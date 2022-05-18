@@ -13,18 +13,19 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
 import com.schibsted.spt.data.jslt.Callable
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.ArrayNode
+import com.schibsted.spt.data.jslt.core.struct.Node
+import com.schibsted.spt.data.jslt.core.struct.NullNode
 import com.schibsted.spt.data.jslt.impl.*
 import com.schibsted.spt.data.jslt.impl.util.asString
 
 class FunctionExpression(
     val functionName: String,
     arguments: Array<ExpressionNode>,
-    location: Location?
+    location: Location?,
 ) : AbstractInvocationExpression(arguments, location) {
     private var function: Function? = null // null before resolution
     private var declared: FunctionDeclaration? = null // non-null if a declared function
@@ -36,7 +37,7 @@ class FunctionExpression(
         if (callable is FunctionDeclaration) declared = callable
     }
 
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: Node?): Node {
         val params = arguments.map { it.apply(scope, input) }.toTypedArray()
 
         return if (declared != null) declared!!.call(scope!!, input!!, params) else {
@@ -58,7 +59,7 @@ class FunctionExpression(
             arguments[1] is LiteralExpression
         ) {
             val v = arguments[1].apply(null, null)
-            if (v.isArray && v.size() > optimizeArrayContainsMin) {
+            if (v is ArrayNode && v.values.size > optimizeArrayContainsMin) {
                 // we use resolve to make sure all references are updated
                 resolve(OptimizedStaticContainsFunction(v))
             }

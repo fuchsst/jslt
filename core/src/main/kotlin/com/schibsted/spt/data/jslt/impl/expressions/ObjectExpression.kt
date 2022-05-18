@@ -13,10 +13,10 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.expressions
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
+import com.schibsted.spt.data.jslt.core.struct.NullNode
+import com.schibsted.spt.data.jslt.core.struct.ObjectNode
 import com.schibsted.spt.data.jslt.filters.JsonFilter
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.OptimizerScope
@@ -49,7 +49,7 @@ data class ObjectExpression(
         }
     }
 
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode {
+    override fun apply(scope: Scope?, input: Node?): Node {
         evalLets(scope!!, input!!, lets)
         val `object` = objectMapper.createObjectNode()
         for (ix in children.indices) {
@@ -67,7 +67,7 @@ data class ObjectExpression(
         return `object`
     }
 
-    private fun evaluateMatcher(scope: Scope, input: JsonNode, `object`: ObjectNode) {
+    private fun evaluateMatcher(scope: Scope, input: Node, `object`: ObjectNode) {
         // find the object to match against
         val context = contextQuery!!.apply(scope, input)
         if (context.isNull && !context.isObject) return  // no keys to match against

@@ -13,10 +13,10 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.*
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.*
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
@@ -27,7 +27,7 @@ class FunctionWrapper(override val name: String, private val method: Method) : F
     override val minArguments: Int = method.parameterCount
     override val maxArguments: Int = method.parameterCount
 
-    override fun call(input: JsonNode, arguments: Array<JsonNode>): JsonNode {
+    override fun call(input: Node, arguments: Array<Node>): Node {
         val args = arrayOfNulls<Any>(arguments.size)
         for (ix in arguments.indices) args[ix] = converters[ix]!!.convert(arguments[ix])
         return try {
@@ -42,7 +42,7 @@ class FunctionWrapper(override val name: String, private val method: Method) : F
 
     // ===== TO JAVA
     internal interface ToJavaConverter {
-        fun convert(node: JsonNode): Any?
+        fun convert(node: Node): Any?
     }
 
     companion object {
@@ -77,72 +77,72 @@ class FunctionWrapper(override val name: String, private val method: Method) : F
     }
 
     internal class StringJavaConverter : ToJavaConverter {
-        override fun convert(node: JsonNode): Any? {
+        override fun convert(node: Node): Any? {
             return if (node.isNull) null else if (node.isTextual) node.asText() else throw JsltException("Could not convert $node to string")
         }
     }
 
     internal class LongJavaConverter : ToJavaConverter {
-        override fun convert(node: JsonNode): Any {
+        override fun convert(node: Node): Any {
             return if (!node.isNumber) throw JsltException("Cannot convert $node to long") else node.asLong()
         }
     }
 
     internal class IntJavaConverter : ToJavaConverter {
-        override fun convert(node: JsonNode): Any {
+        override fun convert(node: Node): Any {
             return if (!node.isNumber) throw JsltException("Cannot convert $node to int") else node.asInt()
         }
     }
 
     internal class BooleanJavaConverter : ToJavaConverter {
-        override fun convert(node: JsonNode): Any {
+        override fun convert(node: Node): Any {
             return if (!node.isBoolean) throw JsltException("Cannot convert $node to boolean") else node.asBoolean()
         }
     }
 
     internal class DoubleJavaConverter : ToJavaConverter {
-        override fun convert(node: JsonNode): Any {
+        override fun convert(node: Node): Any {
             return if (!node.isNumber) throw JsltException("Cannot convert $node to double") else node.asDouble()
         }
     }
 
     // ===== TO JSON
     internal interface ToJsonConverter {
-        fun convert(node: Any?): JsonNode
+        fun convert(node: Any?): Node
     }
 
     internal class StringJsonConverter : ToJsonConverter {
-        override fun convert(node: Any?): JsonNode {
-            return if (node == null) NullNode.instance else TextNode(node as String?)
+        override fun convert(node: Any?): Node {
+            return if (node == null) NullNode.instance else TextNode(node as String)
         }
     }
 
     internal class LongJsonConverter : ToJsonConverter {
-        override fun convert(node: Any?): JsonNode {
-            return if (node == null) NullNode.instance else LongNode((node as Long?)!!)
+        override fun convert(node: Any?): Node {
+            return if (node == null) NullNode.instance else LongNode(node as Long)
         }
     }
 
     internal class IntJsonConverter : ToJsonConverter {
-        override fun convert(node: Any?): JsonNode {
-            return if (node == null) NullNode.instance else IntNode((node as Int?)!!)
+        override fun convert(node: Any?): Node {
+            return if (node == null) NullNode.instance else IntNode(node as Int)
         }
     }
 
     internal class BooleanJsonConverter : ToJsonConverter {
-        override fun convert(node: Any?): JsonNode {
+        override fun convert(node: Any?): Node {
             return if (node == null) NullNode.instance else if (node as Boolean) BooleanNode.TRUE else BooleanNode.FALSE
         }
     }
 
     internal class DoubleJsonConverter : ToJsonConverter {
-        override fun convert(node: Any?): JsonNode {
+        override fun convert(node: Any?): Node {
             return if (node == null) NullNode.instance else DoubleNode((node as Double?)!!)
         }
     }
 
     internal class FloatJsonConverter : ToJsonConverter {
-        override fun convert(node: Any?): JsonNode {
+        override fun convert(node: Any?): Node {
             return if (node == null) NullNode.instance else FloatNode((node as Float?)!!)
         }
     }

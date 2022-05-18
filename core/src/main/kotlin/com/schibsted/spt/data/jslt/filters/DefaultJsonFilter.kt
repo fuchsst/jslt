@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.filters
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.util.isValue
 
 
@@ -24,5 +24,5 @@ class DefaultJsonFilter : JsonFilter {
     /**
      * Whether or not to accept this value.
      */
-    override fun filter(value: JsonNode): Boolean = isValue(value)
+    override fun filter(value: Node): Boolean = isValue(value)
 }

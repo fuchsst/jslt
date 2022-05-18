@@ -11,7 +11,6 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "1.6.20"
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'com.intershop.gradle.javacc' version '4.0.1'
-    id 'java'
     id 'com.jfrog.artifactory'
     id 'maven-publish'
     id 'signing'
@@ -25,7 +24,9 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
+    // implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
+    implementation project(':core-struct')
+    implementation project(':json-struct-converter')
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.2'

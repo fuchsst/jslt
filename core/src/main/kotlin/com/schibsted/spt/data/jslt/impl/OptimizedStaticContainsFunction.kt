@@ -13,18 +13,18 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.BooleanNode
+import com.schibsted.spt.data.jslt.core.struct.BooleanNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 
 /**
  * An optimized version of contains(a, b) which is used when b is an
  * array literal with a large number of values, so that a linear
  * search becomes a performance drag.
  */
-class OptimizedStaticContainsFunction(array: JsonNode) : AbstractFunction("optimized-static-contains", 2, 2) {
-    private val values: Set<JsonNode?> = array.elements().asSequence().toSet()
+class OptimizedStaticContainsFunction(array: Node) : AbstractFunction("optimized-static-contains", 2, 2) {
+    private val values: Set<Node?> = array.elements().asSequence().toSet()
 
-    override fun call(input: JsonNode, arguments: Array<JsonNode>): JsonNode {
+    override fun call(input: Node, arguments: Array<Node>): Node {
         return if (values.contains(arguments[0])) BooleanNode.TRUE else BooleanNode.FALSE
     }
 }

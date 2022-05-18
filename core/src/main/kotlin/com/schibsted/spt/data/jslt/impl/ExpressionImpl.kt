@@ -13,11 +13,11 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
 import com.schibsted.spt.data.jslt.Expression
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
+import com.schibsted.spt.data.jslt.core.struct.NullNode
 import com.schibsted.spt.data.jslt.impl.expressions.DotExpression
 import com.schibsted.spt.data.jslt.impl.expressions.ExpressionNode
 import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
@@ -45,16 +45,16 @@ class ExpressionImpl(
 
     fun hasBody(): Boolean = actual != null
 
-    override fun apply(variables: Map<String, JsonNode>, input: JsonNode?): JsonNode {
+    override fun apply(variables: Map<String, Node>, input: Node?): Node {
         val scope = Scope.makeScope(variables, stackFrameSize, parameterSlots)
         return apply(scope, input)
     }
 
-    override fun apply(input: JsonNode?): JsonNode {
+    override fun apply(input: Node?): Node {
         return apply(Scope.getRoot(stackFrameSize), input)
     }
 
-    fun apply(scope: Scope, input: JsonNode?): JsonNode {
+    fun apply(scope: Scope, input: Node?): Node {
         // Jackson 2.9.2 can parse to Java null. See unit test
         // QueryTest.testNullInput. so we have to handle that
         val nullSafeInput = input ?: NullNode.instance
@@ -86,7 +86,7 @@ class ExpressionImpl(
      * ExpressionImpl is a module. Called once during compilation.
      * The values are then remembered forever.
      */
-    fun evaluateLetsOnly(scope: Scope?, input: JsonNode) {
+    fun evaluateLetsOnly(scope: Scope?, input: Node) {
         evalLets(scope!!, input, lets)
     }
 

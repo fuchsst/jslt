@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 
 /**
  * Fake scope used when optimizing away objects that are static, but
@@ -21,5 +21,5 @@ import com.fasterxml.jackson.databind.JsonNode
  * a scope that does nothing. Which is this class.
  */
 class OptimizerScope : Scope(0) {
-    override fun setValue(slot: Int, value: JsonNode) {}
+    override fun setValue(slot: Int, value: Node) {}
 }

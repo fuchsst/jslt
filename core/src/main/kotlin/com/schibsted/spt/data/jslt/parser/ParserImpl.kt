@@ -13,13 +13,15 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.parser
 
-import com.fasterxml.jackson.databind.node.*
 import com.schibsted.spt.data.jslt.Expression
 import com.schibsted.spt.data.jslt.Function
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.*
 import com.schibsted.spt.data.jslt.impl.*
 import com.schibsted.spt.data.jslt.impl.expressions.*
-import com.schibsted.spt.data.jslt.impl.operator.*
+import com.schibsted.spt.data.jslt.impl.operator.AndOperator
+import com.schibsted.spt.data.jslt.impl.operator.OrOperator
+import com.schibsted.spt.data.jslt.impl.operator.PipeOperator
 import com.schibsted.spt.data.jslt.impl.operator.comparison.*
 import com.schibsted.spt.data.jslt.impl.operator.numeric.DivideOperator
 import com.schibsted.spt.data.jslt.impl.operator.numeric.MinusOperator

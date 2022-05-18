@@ -13,10 +13,10 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.util
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.*
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.*
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.expressions.LetExpression
@@ -26,7 +26,7 @@ import kotlin.math.pow
 
 val objectMapper = ObjectMapper()
 
-fun evalLets(scope: Scope, input: JsonNode, lets: Array<LetExpression>?) {
+fun evalLets(scope: Scope, input: Node, lets: Array<LetExpression>?) {
     if (lets == null) return
     lets.forEach { let ->
         // val `var` = lets[ix].variable
@@ -35,7 +35,7 @@ fun evalLets(scope: Scope, input: JsonNode, lets: Array<LetExpression>?) {
     }
 }
 
-fun JsonNode.isTrue(): Boolean =
+fun Node.isTrue(): Boolean =
     this !== BooleanNode.FALSE &&
             !(isObject && size() == 0) &&
             !(isTextual && asText().isEmpty()) &&
@@ -43,25 +43,25 @@ fun JsonNode.isTrue(): Boolean =
             !(isNumber && doubleValue() == 0.0) &&
             !isNull
 
-fun isValue(value: JsonNode): Boolean = !(value.isNull || !value.isValueNode && value.isEmpty)
+fun isValue(value: Node): Boolean = !(value.isNull || !value.isValueNode && value.isEmpty)
 
-fun Boolean.toJsonNode(): JsonNode = if (this) BooleanNode.TRUE else BooleanNode.FALSE
+fun Boolean.toJsonNode(): Node = if (this) BooleanNode.TRUE else BooleanNode.FALSE
 
-fun Double.toJsonNode(): JsonNode = DoubleNode(this)
+fun Double.toJsonNode(): Node = DoubleNode(this)
 
-fun toJsonNode(array: Array<String?>): JsonNode {
+fun toJsonNode(array: Array<String?>): Node {
     val elements = array.map { if (it == null) NullNode.instance else TextNode(it) }
     return objectMapper.createArrayNode().addAll(elements)
 }
 
 
-fun JsonNode.asString(exceptionWhenNull: Exception = NullPointerException("JsonNode should not be NULL")): String {
+fun Node.asString(exceptionWhenNull: Exception = NullPointerException("JsonNode should not be NULL")): String {
     if (isNull) throw exceptionWhenNull
     // check what type this is
     return if (isTextual) return asText() else toString()
 }
 
-fun JsonNode.asNullableString(): String? =
+fun Node.asNullableString(): String? =
     if (isTextual) // check what type this is
         asText()
     else if (!isNull)
@@ -70,21 +70,21 @@ fun JsonNode.asNullableString(): String? =
         null
 
 
-fun toArray(value: JsonNode, nullok: Boolean): ArrayNode? {
+fun toArray(value: Node, nullok: Boolean): ArrayNode? {
     // check what type this is
     if (value.isArray) return value as ArrayNode else if (value.isNull && nullok) return null
     throw JsltException("Cannot convert $value to array")
 }
 
-fun number(value: JsonNode, loc: Location?=null): JsonNode {
+fun number(value: Node, loc: Location?=null): Node {
     return number(value, false, loc)
 }
 
 @JvmOverloads
 fun number(
-    value: JsonNode, strict: Boolean, loc: Location?,
-    fallback: JsonNode? = null
-): JsonNode {
+    value: Node, strict: Boolean, loc: Location?,
+    fallback: Node? = null
+): Node {
     // check what type this is
     if (value.isNumber) return value else if (value.isNull) {
         return fallback ?: value
@@ -106,7 +106,7 @@ fun number(
 }
 
 // returns null in case of failure (caller then handles fallback)
-private fun parseNumber(number: String): JsonNode? {
+private fun parseNumber(number: String): Node? {
     if (number.isEmpty()) return null
     var pos = 0
     if (number[0] == '-') {
@@ -118,7 +118,7 @@ private fun parseNumber(number: String): JsonNode? {
         return when {
             number.length < 10 -> IntNode(number.toInt())
             number.length < 19 -> LongNode(number.toLong())
-            else -> BigIntegerNode(BigInteger(number))
+            else -> BigIntNode(BigInteger(number))
         }
     }
 
@@ -168,12 +168,12 @@ private fun scanDigits(number: String, pos: Int): Int {
     return currentPos
 }
 
-fun JsonNode.convertObjectToArray(): ArrayNode {
+fun Node.convertObjectToArray(): ArrayNode {
     val elements = fields().asSequence()
         .map { (key, value) ->
             objectMapper.createObjectNode().apply {
-                set<JsonNode>("key", TextNode(key))
-                set<JsonNode>("value", value)
+                set<Node>("key", TextNode(key))
+                set<Node>("value", value)
             }
         }.toList()
     return objectMapper.createArrayNode().apply {

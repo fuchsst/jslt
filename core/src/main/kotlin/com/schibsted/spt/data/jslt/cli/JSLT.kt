@@ -13,10 +13,10 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.cli
 
-import com.fasterxml.jackson.core.JsonParseException
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.schibsted.spt.data.jslt.Parser
+import com.schibsted.spt.data.jslt.core.converter.json.Json2StructConverter
+import com.schibsted.spt.data.jslt.core.struct.Node
+import com.schibsted.spt.data.jslt.parser.ParseException
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -31,11 +31,10 @@ object JSLT {
         val expr = Parser.compile(File(args[0]))
         // if (expr instanceof ExpressionImpl)
         //   ((ExpressionImpl) expr).dump();
-        val mapper = ObjectMapper()
-        val input: JsonNode?
+        val input: Node?
         try {
-            input = mapper.readTree(File(args[1]))
-        } catch (e: JsonParseException) {
+            input = Json2StructConverter(File(args[1]).inputStream()).asStruct()
+        } catch (e: ParseException) {
             println("Couldn't parse JSON file '" + args[1] + "': " + e.message)
             exitProcess(1)
         }

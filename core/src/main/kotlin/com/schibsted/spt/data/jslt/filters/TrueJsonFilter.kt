@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.filters
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 
 /**
  * Accepts all JSON values.
@@ -22,5 +22,5 @@ class TrueJsonFilter : JsonFilter {
     /**
      * Accept this value.
      */
-    override fun filter(value: JsonNode): Boolean = true
+    override fun filter(value: Node): Boolean = true
 }

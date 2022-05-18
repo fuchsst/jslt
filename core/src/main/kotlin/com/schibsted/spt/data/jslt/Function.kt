@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 
 /**
  * Interface for function implementations.
@@ -38,5 +38,5 @@ interface Function : Callable {
     /**
      * Perform the function on the given JSON input with the given arguments.
      */
-    fun call(input: JsonNode, arguments: Array<JsonNode>): JsonNode?
+    fun call(input: Node, arguments: Array<Node>): Node?
 }

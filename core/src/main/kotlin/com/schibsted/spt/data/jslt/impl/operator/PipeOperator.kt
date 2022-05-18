@@ -13,8 +13,8 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl.operator
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.schibsted.spt.data.jslt.JsltException
+import com.schibsted.spt.data.jslt.core.struct.Node
 import com.schibsted.spt.data.jslt.impl.Location
 import com.schibsted.spt.data.jslt.impl.Scope
 import com.schibsted.spt.data.jslt.impl.expressions.DotExpression
@@ -25,12 +25,12 @@ class PipeOperator(
     location: Location?
 ) : AbstractOperator(left, right, "|", location) {
 
-    override fun apply(scope: Scope?, input: JsonNode?): JsonNode = right.apply(scope, left.apply(scope, input))
+    override fun apply(scope: Scope?, input: Node?): Node = right.apply(scope, left.apply(scope, input))
 
     override fun computeMatchContexts(parent: DotExpression?) {
         left.computeMatchContexts(parent)
         right.computeMatchContexts(DotExpression(location = Location(null, 0, 0)))
     }
 
-    override fun perform(v1: JsonNode, v2: JsonNode): JsonNode = throw JsltException("this should NOT be reachable")
+    override fun perform(v1: Node, v2: Node): Node = throw JsltException("this should NOT be reachable")
 }

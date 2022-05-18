@@ -13,12 +13,12 @@
 // limitations under the License.
 package com.schibsted.spt.data.jslt.impl
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.schibsted.spt.data.jslt.core.struct.Node
 import java.util.*
 
 open class Scope(stackFrameSize: Int) {
-    private val globalStackFrame: Array<JsonNode?> = arrayOfNulls(stackFrameSize)
-    private val localStackFrames: ArrayDeque<Array<JsonNode?>> = ArrayDeque()
+    private val globalStackFrame: Array<Node?> = arrayOfNulls(stackFrameSize)
+    private val localStackFrames: ArrayDeque<Array<Node?>> = ArrayDeque()
     fun enterFunction(stackFrameSize: Int) {
         localStackFrames.push(arrayOfNulls(stackFrameSize))
     }
@@ -27,11 +27,11 @@ open class Scope(stackFrameSize: Int) {
         localStackFrames.pop()
     }
 
-    fun getValue(slot: Int): JsonNode? {
+    fun getValue(slot: Int): Node? {
         return if (slot and BITMASK != 0) globalStackFrame[slot and INVERSE] else localStackFrames.peek()[slot]
     }
 
-    open fun setValue(slot: Int, value: JsonNode) {
+    open fun setValue(slot: Int, value: Node) {
         if (slot and BITMASK != 0) globalStackFrame[slot and INVERSE] = value else localStackFrames.peek()[slot] = value
     }
 
@@ -45,9 +45,9 @@ open class Scope(stackFrameSize: Int) {
          * by client code into the JSLT expression.
          */
         fun makeScope(
-            variables: Map<String, JsonNode>,
+            variables: Map<String, Node>,
             stackFrameSize: Int,
-            parameterSlots: Map<String, Int>
+            parameterSlots: Map<String, Int>,
         ): Scope {
             val scope = Scope(stackFrameSize)
 
